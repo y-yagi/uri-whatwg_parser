@@ -1,4 +1,4 @@
-# Uri::WhatwgParser
+# URI::WhatwgParser
 
 Ruby implementation of the [WHATWG URL Living Standard](https://url.spec.whatwg.org/).
 
