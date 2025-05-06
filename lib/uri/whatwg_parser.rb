@@ -50,7 +50,7 @@ module URI
       uri.delete!("\n")
       uri.delete!("\r")
 
-      raise ParseError if uri.empty?
+      raise ParseError, "uri can't be empty" if uri.empty?
 
       @scanner = StringScanner.new(uri)
 
@@ -119,7 +119,7 @@ module URI
     end
 
     def on_no_scheme_state(c)
-      raise ParseError
+      raise ParseError, "scheme is missing"
     end
 
     def on_special_relative_or_authority_state(c)
@@ -169,7 +169,7 @@ module URI
 
         @buffer = +""
       elsif c.nil? || ["/", "?", "#"].include?(c) || (special_url? && c == "\\")
-        raise ParseError if @at_sign_seen && @buffer.empty?
+        raise ParseError, "host is missing" if @at_sign_seen && @buffer.empty?
         @scanner.pos -= (@buffer.bytesize + c&.bytesize.to_i)
         @buffer = +""
         @state = :host_state
@@ -180,7 +180,7 @@ module URI
 
     def on_host_state(c)
       if c == ":" && !@inside_brackets
-        raise ParseError if @buffer.empty?
+        raise ParseError, "host is missing" if @buffer.empty?
 
         @parse_result[:host] = @host_parser.parse(@buffer, !special_url?)
         @buffer = +""
@@ -188,7 +188,7 @@ module URI
       elsif c.nil? || ["/", "?", "#"].include?(c) || (special_url? && c == "\\")
         @scanner.pos -= c.bytesize unless c.nil?
         if special_url? && @buffer.empty?
-          raise ParseError
+          raise ParseError, "host is missing"
         else
           @parse_result[:host] = @host_parser.parse(@buffer, !special_url?)
           @buffer = +""
@@ -208,10 +208,10 @@ module URI
         unless @buffer.empty?
           begin
             port = Integer(@buffer)
-            raise ParseError if port < 0 || port > 65535
+            raise ParseError, "port is invalid value" if port < 0 || port > 65535
             @parse_result[:port] = port unless SPECIAL_SCHEME[@parse_result[:scheme]] == port
           rescue ArgumentError
-            raise ParseError
+            raise ParseError, "port is invalid value"
           end
 
           @buffer = +""
@@ -220,7 +220,7 @@ module URI
         @state = :path_start_state
         @scanner.pos -= c.bytesize unless c.nil?
       else
-        raise ParseError
+        raise ParseError, "port is invalid value"
       end
     end
 

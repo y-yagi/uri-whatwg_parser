@@ -15,7 +15,7 @@ class URI::WhatwgParser
       return if input&.empty?
 
       if input.start_with?("[")
-        raise ParseError unless input.end_with?("]")
+        raise ParseError, "invalid IPv6 format" unless input.end_with?("]")
         return parse_ipv6(input)
       end
 
@@ -28,26 +28,26 @@ class URI::WhatwgParser
         return serialize_ipv4(ipv4)
       end
 
-      raise ParseError if include_forbidden_domain_code_point?(ascii_domain)
+      raise ParseError, "including invalid value in host" if include_forbidden_domain_code_point?(ascii_domain)
       ascii_domain
     rescue URI::IDNA::Error, Encoding::CompatibilityError, ArgumentError => _e
-      raise ParseError
+      raise ParseError, "invalid host value"
     end
 
     private
 
     def parse_ipv4(host)
       parts = host.split(".")
-      raise URI::WhatwgParser::ParseError if parts.size > 4
+      raise URI::WhatwgParser::ParseError, "invalid IPv4 format" if parts.size > 4
       numbers = []
       parts.each do |part|
         value, _validation_error = parse_ipv4_number(part)
         numbers << value
       end
 
-      (numbers.size-1).times {|i| raise URI::WhatwgParser::ParseError if numbers[i] > 255 }
+      (numbers.size-1).times {|i| raise URI::WhatwgParser::ParseError, "invalid IPv4 format" if numbers[i] > 255 }
 
-      raise ParseError if numbers.last >= 256 ** (5 - numbers.size)
+      raise ParseError, "invalid IPv4 format" if numbers.last >= 256 ** (5 - numbers.size)
 
       ipv4 = numbers.pop
       numbers.each_with_index do |number, index|
@@ -70,7 +70,7 @@ class URI::WhatwgParser
     def parse_ipv6(host)
       "[#{IPAddr.new(host).to_s}]"
     rescue
-      raise ParseError
+      raise ParseError, "invalid IPv6 format"
     end
 
     def parse_opaque_host(host)
@@ -83,7 +83,7 @@ class URI::WhatwgParser
         m[1..2].to_i(16).chr
       end
     rescue ArgumentError
-      raise ParseError
+      raise ParseError, "including invalid value in host"
     end
 
     def ends_in_number?(domain)
@@ -103,7 +103,7 @@ class URI::WhatwgParser
     end
 
     def parse_ipv4_number(str)
-      raise ParseError if str&.empty?
+      raise ParseError, "invalid IPv4 format" if str&.empty?
 
       validation_error = false
       r = 10
@@ -124,7 +124,7 @@ class URI::WhatwgParser
         output = Integer(str, r)
         return output, validation_error
       rescue ArgumentError
-        raise ParseError
+        raise ParseError, "invalid IPv4 format"
       end
     end
 
