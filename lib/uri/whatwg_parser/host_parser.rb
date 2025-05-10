@@ -68,8 +68,11 @@ class URI::WhatwgParser
     end
 
     def parse_ipv6(host)
-      "[#{IPAddr.new(host).to_s}]"
-    rescue
+      addr = IPAddr.new(host)
+      # NOTE: URL Standard doesn't support `zone_id`.
+      raise ParseError, "invalid IPv6 format" unless addr.zone_id.nil?
+      "[#{addr}]"
+    rescue IPAddr::InvalidAddressError
       raise ParseError, "invalid IPv6 format"
     end
 

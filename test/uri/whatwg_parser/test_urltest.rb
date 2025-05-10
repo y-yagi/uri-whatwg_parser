@@ -7,21 +7,23 @@ class URI::WhatwgParser::TestURLTest < Test::Unit::TestCase
   urltestdata = JSON.load_file("test/resources/urltestdata.json")
   urltestdata.each do |testdata|
     next if testdata.is_a?(String)
-    next unless testdata["base"].nil?
 
     # TODO: There are valid cases, but uri-idna raises an error
     next if %w(http://../ http://./ http://foo.09.. http://!"$&'()*+,-.;=_`{}~/ wss://!"$&'()*+,-.;=_`{}~/).include?(testdata["input"])
+    # TODO: Enable after implementing IPv6 parser
+    next if %w(http://[0:0:0:0:0:0:13.1.68.3] http://[::127.0.0.1]).include?(testdata["input"])
 
-    define_method "test__#{testdata["input"]}"do
+    test_method_name = testdata["base"].nil? ? "test__#{testdata["input"]}" : "test__#{testdata["input"]}__#{testdata["base"]}"
+    define_method test_method_name do
       if testdata["failure"]
         assert_raise URI::WhatwgParser::ParseError do
           URI.parse(testdata["input"])
         end
       else
         parser = URI::WhatwgParser.new
-        ary = parser.split(testdata["input"])
+        ary = parser.split(testdata["input"], testdata["base"])
         parse_result = { scheme: ary[0], userinfo: ary[1], host: ary[2], port: ary[3], registry: ary[4], path: ary[5], opaque: ary[6], query: ary[7], fragment: ary[8]}
-        assert_equal testdata["protocol"], parse_result[:scheme] + ":", "[protocol]"
+        assert_equal testdata["protocol"], parse_result[:scheme].to_s + ":", "[protocol]"
         assert_equal testdata["hostname"], parse_result[:host].to_s, "[hostname]"
         assert_equal testdata["port"], parse_result[:port].to_s, "[port]"
         assert_equal testdata["pathname"], parse_result[:path], "[pathname]" unless testdata["pathaname"] != "/"
