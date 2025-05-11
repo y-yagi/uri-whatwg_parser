@@ -9,7 +9,7 @@ class URI::WhatwgParser
     include ParserHelper
 
     FORBIDDEN_HOST_CODE_POINT = ["\x00", "\t", "\x0a", "\x0d", " ", "#", "/", ":", "<", ">", "?", "@", "[", "\\", "]", "^", "|"]
-    FORBIDDEN_DOMAIN_CODE_POINT = FORBIDDEN_HOST_CODE_POINT + C0_CONTROL + ["%"]
+    FORBIDDEN_DOMAIN_CODE_POINT = FORBIDDEN_HOST_CODE_POINT + C0_CONTROL_PERCENT_ENCODE_SET + ["%", "\x7f"]
 
     def parse(input, opaque = false) # :nodoc:
       return if input&.empty?
@@ -22,13 +22,12 @@ class URI::WhatwgParser
       return parse_opaque_host(input) if opaque
 
       domain = percent_decode(input)
-      ascii_domain = URI::IDNA.whatwg_to_ascii(domain.force_encoding(Encoding::UTF_8))
+      ascii_domain = domain_to_ascii(domain)
       if ends_in_number?(ascii_domain)
         ipv4 = parse_ipv4(ascii_domain)
         return serialize_ipv4(ipv4)
       end
 
-      raise ParseError, "including invalid value in host" if include_forbidden_domain_code_point?(ascii_domain)
       ascii_domain
     rescue URI::IDNA::Error, Encoding::CompatibilityError, ArgumentError => _e
       raise ParseError, "invalid host value"
@@ -90,11 +89,14 @@ class URI::WhatwgParser
     end
 
     def ends_in_number?(domain)
-      parts = domain.split(".")
-      return false if parts.size == 0
+      parts = domain.split(".", -1)
+      if parts.last == ""
+        return false if parts.size == 1
+        parts.pop
+      end
 
       last = parts.last
-      return true if last.chars.all? { |c| ascii_digit?(c) }
+      return true if last != "" && last.chars.all? { |c| ascii_digit?(c) }
 
       begin
         parse_ipv4_number(last)
@@ -129,6 +131,15 @@ class URI::WhatwgParser
       rescue ArgumentError
         raise ParseError, "invalid IPv4 format"
       end
+    end
+
+    def domain_to_ascii(domain)
+      ascii_domain = URI::IDNA.whatwg_to_ascii(domain.force_encoding(Encoding::UTF_8), be_strict: false)
+
+      raise ParseError, "including invalid value in host" if include_forbidden_domain_code_point?(ascii_domain)
+      raise ParseError, "host can't be empty" if ascii_domain.empty?
+
+      ascii_domain
     end
 
     def include_forbidden_domain_code_point?(str)
