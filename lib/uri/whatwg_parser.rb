@@ -80,6 +80,18 @@ module URI
       @parse_result.values
     end
 
+    def join(*uris)
+      return parse(uris[0]) if uris.size == 1
+
+      base, input = uris.shift(2)
+      uri = parse(input.to_s, base.to_s)
+      uris.each do |input|
+        uri = parse(input.to_s, uri.to_s)
+      end
+
+      uri
+    end
+
     private
 
     def reset
