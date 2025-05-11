@@ -70,9 +70,22 @@ class URI::WhatwgParser
       addr = IPAddr.new(host)
       # NOTE: URL Standard doesn't support `zone_id`.
       raise ParseError, "invalid IPv6 format" unless addr.zone_id.nil?
-      "[#{addr}]"
+      formatted_addr = (("%.32x" % addr).gsub(/.{4}(?!$)/, '\&:'))
+      "[#{compress_ipv6(formatted_addr)}]"
     rescue IPAddr::InvalidAddressError
       raise ParseError, "invalid IPv6 format"
+    end
+
+    def compress_ipv6(ip)
+      output = ip.split(':').map { |term| term.sub(/\A0+/, '').empty? ? '0' : term.sub(/\A0+/, '') }.join(':')
+      zeros = output.scan(/:?(?:0+:?){2,}/)
+
+      unless zeros.empty?
+        max = zeros.max_by { |item| item.gsub(':', '').length }
+        output = output.sub(max, '::')
+      end
+
+      output
     end
 
     def parse_opaque_host(host)

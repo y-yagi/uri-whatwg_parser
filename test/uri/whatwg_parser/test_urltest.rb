@@ -8,9 +8,6 @@ class URI::WhatwgParser::TestURLTest < Test::Unit::TestCase
   urltestdata.each do |testdata|
     next if testdata.is_a?(String)
 
-    # TODO: Enable after implementing IPv6 parser
-    next if %w(http://[0:0:0:0:0:0:13.1.68.3] http://[::127.0.0.1]).include?(testdata["input"])
-
     test_method_name = testdata["base"].nil? ? "test__#{testdata["input"]}" : "test__#{testdata["input"]}__#{testdata["base"]}"
     define_method test_method_name do
       if testdata["failure"]
