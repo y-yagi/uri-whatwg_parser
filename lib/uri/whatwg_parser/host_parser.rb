@@ -89,11 +89,14 @@ class URI::WhatwgParser
     end
 
     def ends_in_number?(domain)
-      parts = domain.split(".")
-      return false if parts.size == 0
+      parts = domain.split(".", -1)
+      if parts.last == ""
+        return false if parts.size == 1
+        parts.pop
+      end
 
       last = parts.last
-      return true if last.chars.all? { |c| ascii_digit?(c) }
+      return true if last != "" && last.chars.all? { |c| ascii_digit?(c) }
 
       begin
         parse_ipv4_number(last)
