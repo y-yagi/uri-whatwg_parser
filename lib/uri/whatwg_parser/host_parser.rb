@@ -77,12 +77,12 @@ class URI::WhatwgParser
     end
 
     def compress_ipv6(ip)
-      output = ip.split(':').map { |term| term.sub(/\A0+/, '').empty? ? '0' : term.sub(/\A0+/, '') }.join(':')
+      output = ip.split(":").map { |term| term.sub(/\A0+/, "").empty? ? "0" : term.sub(/\A0+/, "") }.join(":")
       zeros = output.scan(/:?(?:0+:?){2,}/)
 
       unless zeros.empty?
-        max = zeros.max_by { |item| item.gsub(':', '').length }
-        output = output.sub(max, '::')
+        max = zeros.max_by { |item| item.gsub(":", "").length }
+        output = output.sub(max, "::")
       end
 
       output
