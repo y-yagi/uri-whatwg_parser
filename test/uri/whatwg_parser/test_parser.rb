@@ -13,4 +13,15 @@ class URI::WhatwgParser::TestParserTest < Test::Unit::TestCase
     assert_equal "id=30&limit=5", uri.query
     assert_equal "time=1305298413", uri.fragment
   end
+
+  def test_join
+    uri = URI.join("http://www.ruby-lang.org/")
+    assert_equal uri.to_s, "http://www.ruby-lang.org/"
+
+    uri = URI.join("http://www.ruby-lang.org/", "/ja/man-1.6/")
+    assert_equal uri.to_s, "http://www.ruby-lang.org/ja/man-1.6/"
+
+    uri = URI.join("http://www.ruby-lang.org/", "/ja/man-1.6/" "b")
+    assert_equal uri.to_s, "http://www.ruby-lang.org/ja/man-1.6/b"
+  end
 end
