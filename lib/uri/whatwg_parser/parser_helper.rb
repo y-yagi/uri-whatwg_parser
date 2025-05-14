@@ -2,8 +2,7 @@
 
 class URI::WhatwgParser
   module ParserHelper
-    C0_CONTROL = (0..0x1f).to_a
-    C0_CONTROL_PERCENT_ENCODE_SET = C0_CONTROL.map(&:chr)
+    C0_CONTROL_PERCENT_ENCODE_SET = (0..0x1f).map(&:chr)
 
     def ascii_alpha?(c)
       ASCII_ALPHA.include?(c)

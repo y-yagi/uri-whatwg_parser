@@ -476,14 +476,6 @@ module URI
       @parse_result[:fragment] = @parse_result[:fragment].to_s + percent_encode(c, FRAGMENT_PERCENT_ENCODE_SET)
     end
 
-    def c0_control_or_space?(c)
-      c0_control? || c == " "
-    end
-
-    def c0_control?(c)
-      C0_CONTROL.include?(c.ord)
-    end
-
     def windows_drive_letter?(str)
       WINDOWS_DRIVE_LETTER.match?(str)
     end
