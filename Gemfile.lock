@@ -9,6 +9,7 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
+    benchmark-ips (2.14.0)
     date (3.4.1)
     debug (1.10.0)
       irb (~> 1.10)
@@ -42,6 +43,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
+  benchmark-ips
   debug
   irb
   rake (~> 13.0)
