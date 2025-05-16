@@ -491,7 +491,7 @@ module URI
     end
 
     def special_url?
-      SPECIAL_SCHEME.keys.include?(@parse_result[:scheme])
+      SPECIAL_SCHEME.key?(@parse_result[:scheme])
     end
 
     def single_dot_path_segments?(c)
