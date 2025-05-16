@@ -75,7 +75,7 @@ module URI
       end
 
       @parse_result[:userinfo] = "#{@username}:#{@password}" if !@username.nil? || !@password.nil?
-      @parse_result[:path] = "/#{@paths.join("/")}" if !@paths.empty?
+      @parse_result[:path] = "/#{@paths.join("/")}" if @paths && !@paths.empty?
 
       @parse_result.values
     end
@@ -100,7 +100,7 @@ module URI
       @at_sign_seen = nil
       @password_token_seen = nil
       @inside_brackets = nil
-      @paths = []
+      @paths = nil
       @username = nil
       @password = nil
       @parse_result = { scheme: nil, userinfo: nil, host: nil, port: nil, registry: nil, path: nil, opaque: nil, query: nil, fragment: nil }
@@ -346,7 +346,7 @@ module URI
           if !starts_with_windows_drive_letter?(@scanner.rest)
             shorten_url_path
           else
-            @paths = []
+            @paths = nil
           end
           @state = :path_state
           decrease_pos(c)
@@ -363,7 +363,7 @@ module URI
       else
         if !@base.nil? && @base[:scheme] == "file"
           @parse_result[:host] = @base[:host]
-          if !starts_with_windows_drive_letter?(@scanner.rest) && normalized_windows_drive_letter?(@base_paths[0])
+          if !starts_with_windows_drive_letter?(@scanner.rest) && @base_paths && normalized_windows_drive_letter?(@base_paths[0])
             @paths[0] += @base_paths[0]
           end
         end
@@ -412,6 +412,8 @@ module URI
     end
 
     def on_path_state(c)
+      @paths ||= []
+
       if (c.nil? || c == "/") || (special_url? && c == "\/") || (c == "?" || c == "#")
 
         if double_dot_path_segments?(@buffer)
