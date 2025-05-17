@@ -135,7 +135,7 @@ module URI
           @state = :path_or_authority_state
           @scanner.pos += c.bytesize
         else
-          @parse_result[:path] = ""
+          @parse_result[:path] = nil
           @state = :opaque_path_state
         end
       else
@@ -152,7 +152,7 @@ module URI
         @parse_result[:scheme] = @base[:scheme]
         @parse_result[:path] = @base[:path]
         @parse_result[:query] = @base[:query]
-        @parse_result[:fragment] = ""
+        @parse_result[:fragment] = nil
         @state = :fragment_state
       elsif @base[:scheme] != "file"
         @state = :relative_state
@@ -196,10 +196,10 @@ module URI
         @parse_result[:query] = @base[:query]
 
         if c == "?"
-          @parse_result[:query] = ""
+          @parse_result[:query] = nil
           @state = :query_state
         elsif c == "#"
-          @parse_result[:fragment] = ""
+          @parse_result[:fragment] = nil
           @state = :fragment_state
         elsif !c.nil?
           @parse_result[:query] = nil
@@ -324,7 +324,7 @@ module URI
 
     def on_file_state(c)
       @parse_result[:scheme] = "file"
-      @parse_result[:host] = ""
+      @parse_result[:host] = nil
 
       if c == "/" || c == "\\"
         @state = :file_slash_state
@@ -332,10 +332,10 @@ module URI
         @parse_result[:host] = @base[:host]
         @parse_result[:query] = @base[:query]
         if c == "?"
-          @parse_result[:query] = ""
+          @parse_result[:query] = nil
           @state = :query_state
         elsif c == "#"
-          @parse_result[:fragment] = ""
+          @parse_result[:fragment] = nil
           @state = :fragment_state
         elsif !c.nil?
           @parse_result[:query] = nil
@@ -375,7 +375,7 @@ module URI
         if windows_drive_letter?(@buffer)
           @state = :path_state
         elsif @buffer.empty?
-          @parse_result[:host] = ""
+          @parse_result[:host] = nil
           @state = :path_start_state
         else
           host = @host_parser.parse(@buffer, !special_url?)
@@ -429,10 +429,10 @@ module URI
         @buffer = +""
 
         if c == "?"
-          @parse_result[:query] = ""
+          @parse_result[:query] = nil
           @state = :query_state
         elsif c == "#"
-          @parse_result[:frament] = ""
+          @parse_result[:frament] = nil
           @state = :fragment_state
         end
       else
@@ -442,10 +442,10 @@ module URI
 
     def on_opaque_path_state(c)
       if c == "?"
-        @parse_result[:query] = ""
+        @parse_result[:query] = nil
         @state = :query_state
       elsif c == "#"
-        @parse_result[:fragment] = ""
+        @parse_result[:fragment] = nil
         @state = :fragment_state
       elsif c == " "
         if @scanner.rest.start_with?("?") || @scanner.rest.start_with?("#")
