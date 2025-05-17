@@ -113,11 +113,7 @@ module URI
         @buffer += c.downcase
         @state = :scheme_state
       else
-        if c.nil?
-          @force_continue = true
-        else
-          @scanner.pos -= c.bytesize
-        end
+        decrease_pos(c)
         @state = :no_scheme_state
       end
     end
