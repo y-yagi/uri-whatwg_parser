@@ -19,6 +19,7 @@ GEM
       pp (>= 0.6.0)
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
+    memory_profiler (1.1.0)
     power_assert (2.0.5)
     pp (0.6.2)
       prettyprint
@@ -46,6 +47,7 @@ DEPENDENCIES
   benchmark-ips
   debug
   irb
+  memory_profiler
   rake (~> 13.0)
   test-unit
   uri-whatwg_parser!
