@@ -64,7 +64,7 @@ module URI
 
       loop do
         c = @scanner.getch
-        send("on_#{@state}", c)
+        send(@state, c)
 
         if @force_continue
           @force_continue = false
@@ -108,7 +108,7 @@ module URI
       @state = :scheme_start_state
     end
 
-    def on_scheme_start_state(c)
+    def scheme_start_state(c)
       if ascii_alpha?(c)
         @buffer += c.downcase
         @state = :scheme_state
@@ -118,7 +118,7 @@ module URI
       end
     end
 
-    def on_scheme_state(c)
+    def scheme_state(c)
       if ascii_alphanumerica?(c) || ["+", "-", "."].include?(c)
         @buffer += c.downcase
       elsif c == ":"
@@ -145,7 +145,7 @@ module URI
       end
     end
 
-    def on_no_scheme_state(c)
+    def no_scheme_state(c)
       raise ParseError, "scheme is missing" if @base.nil? || !@base[:opaque].nil? && c != "#"
 
       if !@base[:opaque].nil? && c == "#"
@@ -163,7 +163,7 @@ module URI
       end
     end
 
-    def on_special_relative_or_authority_state(c)
+    def special_relative_or_authority_state(c)
       if c == "/" && @scanner.rest.start_with?("/")
         @state = :special_authority_ignore_slashes_state
         decrease_pos(c)
@@ -173,7 +173,7 @@ module URI
       end
     end
 
-    def on_path_or_authority_state(c)
+    def path_or_authority_state(c)
       if c == "/"
         @state = :authority_state
       else
@@ -182,7 +182,7 @@ module URI
       end
     end
 
-    def on_relative_state(c)
+    def relative_state(c)
       @parse_result[:scheme] = @base[:scheme]
       if c == "/"
         @state = :relative_slash_state
@@ -210,7 +210,7 @@ module URI
       end
     end
 
-    def on_relative_slash_state(c)
+    def relative_slash_state(c)
       if special_url? && (c == "/" || c == "\\")
         @state = :special_authority_ignore_slashes_state
       elsif c == "/"
@@ -224,7 +224,7 @@ module URI
       end
     end
 
-    def on_special_authority_slashes_state(c)
+    def special_authority_slashes_state(c)
       if c == "/" && @scanner.rest.start_with?("/")
         @state = :special_authority_ignore_slashes_state
         @scanner.pos += c.bytesize
@@ -234,14 +234,14 @@ module URI
       end
     end
 
-    def on_special_authority_ignore_slashes_state(c)
+    def special_authority_ignore_slashes_state(c)
       if c != "/" && c != "\\"
         @state = :authority_state
         decrease_pos(c)
       end
     end
 
-    def on_authority_state(c)
+    def authority_state(c)
       if c == "@"
         @buffer.prepend("%40") if @at_sign_seen
         @at_sign_seen = true
@@ -276,7 +276,7 @@ module URI
       end
     end
 
-    def on_host_state(c)
+    def host_state(c)
       if c == ":" && !@inside_brackets
         raise ParseError, "host is missing" if @buffer.empty?
 
@@ -299,7 +299,7 @@ module URI
       end
     end
 
-    def on_port_state(c)
+    def port_state(c)
       if ascii_digit?(c)
         @buffer += c
       elsif c.nil? || ["/", "?", "#"].include?(c) || (special_url? && c == "\\")
@@ -322,7 +322,7 @@ module URI
       end
     end
 
-    def on_file_state(c)
+    def file_state(c)
       @parse_result[:scheme] = "file"
       @parse_result[:host] = nil
 
@@ -353,7 +353,7 @@ module URI
       end
     end
 
-    def on_file_slash_state(c)
+    def file_slash_state(c)
       if c == "/" || c == "\\"
         @state = :file_host_state
       else
@@ -368,7 +368,7 @@ module URI
       end
     end
 
-    def on_file_host_state(c)
+    def file_host_state(c)
       if c.nil? || c == "/" || c == "\\" || c == "?" || c == "#"
         @scanner.pos -= c.bytesize unless c.nil?
 
@@ -391,7 +391,7 @@ module URI
       @buffer += c unless c.nil?
     end
 
-    def on_path_start_state(c)
+    def path_start_state(c)
       return if c.nil?
 
       if special_url?
@@ -407,7 +407,7 @@ module URI
       end
     end
 
-    def on_path_state(c)
+    def path_state(c)
       @paths ||= []
 
       if (c.nil? || c == "/") || (special_url? && c == "\/") || (c == "?" || c == "#")
@@ -440,7 +440,7 @@ module URI
       end
     end
 
-    def on_opaque_path_state(c)
+    def opaque_path_state(c)
       if c == "?"
         @parse_result[:query] = nil
         @state = :query_state
@@ -458,7 +458,7 @@ module URI
       end
     end
 
-    def on_query_state(c)
+    def query_state(c)
       if c.nil? || c == "#"
         query_percent_encode_set = special_url? ? SPECIAL_QUERY_PERCENT_ENCODE_SET : QUERY_PERCENT_ENCODE_SET
         @parse_result[:query] = @buffer.chars.map { |c| percent_encode(c, query_percent_encode_set) }.join
@@ -469,7 +469,7 @@ module URI
       end
     end
 
-    def on_fragment_state(c)
+    def fragment_state(c)
       return if c.nil?
       @parse_result[:fragment] = @parse_result[:fragment].to_s + percent_encode(c, FRAGMENT_PERCENT_ENCODE_SET)
     end
