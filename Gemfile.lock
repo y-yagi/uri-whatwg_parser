@@ -2,7 +2,6 @@ PATH
   remote: .
   specs:
     uri-whatwg_parser (0.1.2)
-      strscan
       uri
       uri-idna
 
@@ -33,7 +32,6 @@ GEM
     reline (0.6.1)
       io-console (~> 0.5)
     stringio (3.1.7)
-    strscan (3.1.5)
     test-unit (3.6.8)
       power_assert
     uri (1.0.3)
