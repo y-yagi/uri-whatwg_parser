@@ -52,8 +52,8 @@ module URI
       end
 
       uri = uri.dup
-      uri.gsub!(/\A[\u0000-\u0020]*/, "")
-      uri.gsub!(/[\u0000-\u0020]*\z/, "")
+      uri.sub!(/\A[\u0000-\u0020]*/, "")
+      uri.sub!(/[\u0000-\u0020]*\z/, "")
       uri.delete!("\t")
       uri.delete!("\n")
       uri.delete!("\r")
