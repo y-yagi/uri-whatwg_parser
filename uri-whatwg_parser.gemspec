@@ -27,7 +27,6 @@ Gem::Specification.new do |spec|
   spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "strscan"
   spec.add_dependency "uri"
   spec.add_dependency "uri-idna"
   spec.add_development_dependency "debug"

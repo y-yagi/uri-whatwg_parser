@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require "strscan"
 require "uri"
 require_relative "whatwg_parser/error"
 require_relative "whatwg_parser/version"
@@ -51,27 +50,21 @@ module URI
         reset
       end
 
-      uri = uri.dup
-      uri.sub!(/\A[\u0000-\u0020]*/, "")
-      uri.sub!(/[\u0000-\u0020]*\z/, "")
-      uri.delete!("\t")
-      uri.delete!("\n")
-      uri.delete!("\r")
+      @uri = uri.dup
+      @uri.sub!(/\A[\u0000-\u0020]*/, "")
+      @uri.sub!(/[\u0000-\u0020]*\z/, "")
+      @uri.delete!("\t")
+      @uri.delete!("\n")
+      @uri.delete!("\r")
 
       raise ParseError, "uri can't be empty" if uri.empty? && @base.nil?
 
-      @scanner = StringScanner.new(uri)
+      @pos = 0
 
-      loop do
-        c = @scanner.getch
+      while @pos <= @uri.length
+        c = @uri[@pos]
         send(@state, c)
-
-        if @force_continue
-          @force_continue = false
-          next
-        end
-
-        break if c.nil? && @scanner.eos?
+        @pos += 1
       end
 
       @parse_result[:userinfo] = "#{@username}:#{@password}" if !@username.nil? || !@password.nil?
@@ -95,7 +88,6 @@ module URI
     private
 
     def reset
-      @scanner = nil
       @buffer = +""
       @at_sign_seen = nil
       @password_token_seen = nil
@@ -113,7 +105,7 @@ module URI
         @buffer += c.downcase
         @state = :scheme_state
       else
-        decrease_pos(c)
+        @pos -= 1
         @state = :no_scheme_state
       end
     end
@@ -131,16 +123,16 @@ module URI
           @state = :special_relative_or_authority_state
         elsif special_url?
           @state = :special_authority_slashes_state
-        elsif @scanner.rest.start_with?("/")
+        elsif rest.start_with?("/")
           @state = :path_or_authority_state
-          @scanner.pos += c.bytesize
+          @pos += 1
         else
           @parse_result[:path] = nil
           @state = :opaque_path_state
         end
       else
         @buffer = +""
-        decrease_pos(c)
+        @pos -= 1
         @state = :no_scheme_state
       end
     end
@@ -156,20 +148,20 @@ module URI
         @state = :fragment_state
       elsif @base[:scheme] != "file"
         @state = :relative_state
-        decrease_pos(c)
+        @pos -= 1
       else
         @state = :file_state
-        decrease_pos(c)
+        @pos -= 1
       end
     end
 
     def special_relative_or_authority_state(c)
-      if c == "/" && @scanner.rest.start_with?("/")
+      if c == "/" && rest.start_with?("/")
         @state = :special_authority_ignore_slashes_state
-        decrease_pos(c)
+        @pos -= 1
       else
         @state = :relative_state
-        decrease_pos(c)
+        @pos -= 1
       end
     end
 
@@ -178,7 +170,7 @@ module URI
         @state = :authority_state
       else
         @state = :path_state
-        decrease_pos(c)
+        @pos -= 1
       end
     end
 
@@ -205,7 +197,7 @@ module URI
           @parse_result[:query] = nil
           shorten_url_path
           @state = :path_state
-          @scanner.pos -= c.bytesize
+          @pos -= 1
         end
       end
     end
@@ -220,24 +212,24 @@ module URI
         @parse_result[:host] = @base[:host]
         @parse_result[:port] = @base[:port]
         @state = :path_state
-        decrease_pos(c)
+        @pos -= 1
       end
     end
 
     def special_authority_slashes_state(c)
-      if c == "/" && @scanner.rest.start_with?("/")
+      if c == "/" && rest.start_with?("/")
         @state = :special_authority_ignore_slashes_state
-        @scanner.pos += c.bytesize
+        @pos += 1
       else
         @state = :special_authority_ignore_slashes_state
-        decrease_pos(c)
+        @pos -= 1
       end
     end
 
     def special_authority_ignore_slashes_state(c)
       if c != "/" && c != "\\"
         @state = :authority_state
-        decrease_pos(c)
+        @pos -= 1
       end
     end
 
@@ -263,12 +255,8 @@ module URI
         @buffer = +""
       elsif c.nil? || ["/", "?", "#"].include?(c) || (special_url? && c == "\\")
         raise ParseError, "host is missing" if @at_sign_seen && @buffer.empty?
-        if c.nil?
-          @force_continue = true
-          @scanner.pos -= @buffer.bytesize
-        else
-          @scanner.pos -= (@buffer.bytesize + c.bytesize.to_i)
-        end
+
+        @pos -= (@buffer.size + 1)
         @buffer = +""
         @state = :host_state
       else
@@ -284,7 +272,7 @@ module URI
         @buffer = +""
         @state = :port_state
       elsif c.nil? || ["/", "?", "#"].include?(c) || (special_url? && c == "\\")
-        decrease_pos(c)
+        @pos -= 1
         if special_url? && @buffer.empty?
           raise ParseError, "host is missing"
         else
@@ -316,7 +304,7 @@ module URI
         end
 
         @state = :path_start_state
-        decrease_pos(c)
+        @pos -= 1
       else
         raise ParseError, "port is invalid value"
       end
@@ -339,17 +327,17 @@ module URI
           @state = :fragment_state
         elsif !c.nil?
           @parse_result[:query] = nil
-          if !starts_with_windows_drive_letter?(@scanner.rest)
+          if !starts_with_windows_drive_letter?(rest)
             shorten_url_path
           else
             @paths = nil
           end
           @state = :path_state
-          decrease_pos(c)
+          @pos -= 1
         end
       else
         @state = :path_state
-        decrease_pos(c)
+        @pos -= 1
       end
     end
 
@@ -359,18 +347,18 @@ module URI
       else
         if !@base.nil? && @base[:scheme] == "file"
           @parse_result[:host] = @base[:host]
-          if !starts_with_windows_drive_letter?(@scanner.rest) && @base_paths && normalized_windows_drive_letter?(@base_paths[0])
+          if !starts_with_windows_drive_letter?(rest) && @base_paths && normalized_windows_drive_letter?(@base_paths[0])
             @paths[0] += @base_paths[0]
           end
         end
         @state = :path_state
-        decrease_pos(c)
+        @pos -= 1
       end
     end
 
     def file_host_state(c)
       if c.nil? || c == "/" || c == "\\" || c == "?" || c == "#"
-        @scanner.pos -= c.bytesize unless c.nil?
+        @pos -= 1
 
         if windows_drive_letter?(@buffer)
           @state = :path_state
@@ -392,17 +380,15 @@ module URI
     end
 
     def path_start_state(c)
-      return if c.nil?
-
       if special_url?
-        @scanner.pos -= c.bytesize if c != "/" && c != "\\"
+        @pos -= 1 if c != "/" && c != "\\"
         @state = :path_state
       elsif c == "?"
         @state = :query_state
       elsif c == "#"
         @state = :fragment_state
       elsif c != nil
-        @scanner.pos -= c.bytesize if c != "/"
+        @pos -= 1 if c != "/"
         @state = :path_state
       end
     end
@@ -448,7 +434,7 @@ module URI
         @parse_result[:fragment] = nil
         @state = :fragment_state
       elsif c == " "
-        if @scanner.rest.start_with?("?") || @scanner.rest.start_with?("#")
+        if rest.start_with?("?") || rest.start_with?("#")
           @parse_result[:path] = @parse_result[:path].to_s + "%20"
         else
           @parse_result[:path] = @parse_result[:path].to_s + " "
@@ -505,12 +491,8 @@ module URI
       @parse_result[:path]&.chomp!
     end
 
-    def decrease_pos(c)
-      if c.nil?
-        @force_continue = true
-      else
-        @scanner.pos -= c.bytesize
-      end
+    def rest
+      @uri[@pos+1..]
     end
   end
 end
