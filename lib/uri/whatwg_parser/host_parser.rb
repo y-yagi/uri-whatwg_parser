@@ -156,11 +156,11 @@ class URI::WhatwgParser
     end
 
     def include_forbidden_domain_code_point?(str)
-      str.chars.intersect?(FORBIDDEN_DOMAIN_CODE_POINT)
+      FORBIDDEN_DOMAIN_CODE_POINT.any? {|c| str.include?(c) }
     end
 
     def include_forbidden_host_code_point?(str)
-      str.chars.intersect?(FORBIDDEN_HOST_CODE_POINT)
+      FORBIDDEN_HOST_CODE_POINT.any? {|c| str.include?(c) }
     end
   end
 end
