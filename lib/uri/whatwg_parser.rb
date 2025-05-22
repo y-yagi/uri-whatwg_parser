@@ -11,8 +11,6 @@ module URI
     include ParserHelper
 
     SPECIAL_SCHEME = { "ftp" => 21, "file" => nil, "http" => 80, "https" => 443, "ws" => 80, "wss" => 443 }
-    ASCII_ALPHA = ("a".."z").to_a + ("A".."Z").to_a
-    ASCII_DIGIT = ("0".."9").to_a
 
     FRAGMENT_PERCENT_ENCODE_SET = C0_CONTROL_PERCENT_ENCODE_SET + [" ", "\"", "<", ">", "`"]
     QUERY_PERCENT_ENCODE_SET = C0_CONTROL_PERCENT_ENCODE_SET + [" ", "\"", "#", "<", ">"]
