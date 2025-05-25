@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     uri-whatwg_parser (0.1.3)
-      uri
+      uri (>= 1.0.0)
       uri-idna
 
 GEM
