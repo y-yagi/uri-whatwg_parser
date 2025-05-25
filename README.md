@@ -17,6 +17,8 @@ gem install uri-whatwg_parser
 This gem is compatible with [`uri`](https://github.com/ruby/uri) gem and automatically switches parser's behavior. So users don't need to set up.
 
 ```ruby
+require "uri/whatwg_parser"
+
 URI.parse("http://日本語.jp")
 # => #<URI::HTTP http://xn--wgv71a119e.jp>
 ```
