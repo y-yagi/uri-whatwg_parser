@@ -129,7 +129,7 @@ module URI
           @state = :opaque_path_state
         end
       else
-        @buffer = +""
+        @buffer.clear
         @pos -= 1
         @state = :no_scheme_state
       end
@@ -250,12 +250,12 @@ module URI
           end
         end
 
-        @buffer = +""
+        @buffer.clear
       elsif c.nil? || ["/", "?", "#"].include?(c) || (special_url? && c == "\\")
         raise ParseError, "host is missing" if @at_sign_seen && @buffer.empty?
 
         @pos -= (@buffer.size + 1)
-        @buffer = +""
+        @buffer.clear
         @state = :host_state
       else
         @buffer << c
@@ -267,7 +267,7 @@ module URI
         raise ParseError, "host is missing" if @buffer.empty?
 
         @parse_result[:host] = @host_parser.parse(@buffer, !special_url?)
-        @buffer = +""
+        @buffer.clear
         @state = :port_state
       elsif c.nil? || ["/", "?", "#"].include?(c) || (special_url? && c == "\\")
         @pos -= 1
@@ -275,7 +275,7 @@ module URI
           raise ParseError, "host is missing"
         else
           @parse_result[:host] = @host_parser.parse(@buffer, !special_url?)
-          @buffer = +""
+          @buffer.clear
           @state = :path_start_state
         end
       else
@@ -298,7 +298,7 @@ module URI
             raise ParseError, "port is invalid value"
           end
 
-          @buffer = +""
+          @buffer.clear
         end
 
         @state = :path_start_state
@@ -369,7 +369,7 @@ module URI
             @parse_result[:host] = host
           end
 
-          @buffer = +""
+          @buffer.clear
           @state = :path_start_state
         end
       end
@@ -446,7 +446,7 @@ module URI
       if c.nil? || c == "#"
         query_percent_encode_set = special_url? ? SPECIAL_QUERY_PERCENT_ENCODE_SET : QUERY_PERCENT_ENCODE_SET
         @parse_result[:query] = @buffer.chars.map { |c| percent_encode(c, query_percent_encode_set) }.join
-        @buffer = +""
+        @buffer.clear
         @state = :fragment_state if c == "#"
       elsif !c.nil?
         @buffer << c
