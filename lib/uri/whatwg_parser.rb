@@ -100,7 +100,7 @@ module URI
 
     def scheme_start_state(c)
       if ascii_alpha?(c)
-        @buffer += c.downcase
+        @buffer << c.downcase
         @state = :scheme_state
       else
         @pos -= 1
@@ -110,7 +110,7 @@ module URI
 
     def scheme_state(c)
       if ascii_alphanumerica?(c) || ["+", "-", "."].include?(c)
-        @buffer += c.downcase
+        @buffer << c.downcase
       elsif c == ":"
         @parse_result[:scheme] = @buffer
         @buffer = +""
@@ -281,13 +281,13 @@ module URI
       else
         @inside_brackets = true if c == "["
         @inside_brackets = false if c == "]"
-        @buffer += c
+        @buffer << c
       end
     end
 
     def port_state(c)
       if ascii_digit?(c)
-        @buffer += c
+        @buffer << c
       elsif c.nil? || ["/", "?", "#"].include?(c) || (special_url? && c == "\\")
         unless @buffer.empty?
           begin
@@ -346,7 +346,7 @@ module URI
         if !@base.nil? && @base[:scheme] == "file"
           @parse_result[:host] = @base[:host]
           if !starts_with_windows_drive_letter?(rest) && @base_paths && normalized_windows_drive_letter?(@base_paths[0])
-            @paths[0] += @base_paths[0]
+            @paths[0] << @base_paths[0]
           end
         end
         @state = :path_state
@@ -374,7 +374,7 @@ module URI
         end
       end
 
-      @buffer += c unless c.nil?
+      @buffer << c unless c.nil?
     end
 
     def path_start_state(c)
