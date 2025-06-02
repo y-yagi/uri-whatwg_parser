@@ -4,10 +4,7 @@ require "uri/whatwg_parser"
 whatwg_parser = URI::WhatwgParser.new
 $VERBOSE = nil
 
-condition = ""
-if ENV["USE_STRSCAN"] == 'true'
-  condition += " with strscan"
-end
+condition = `git name-rev --name-only HEAD`.strip
 if RubyVM::YJIT.enabled?
   condition += " with YJIT"
 end
