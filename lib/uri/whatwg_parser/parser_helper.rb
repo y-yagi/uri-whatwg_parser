@@ -19,10 +19,12 @@ class URI::WhatwgParser
     end
 
     def percent_encode(c, encode_set)
-      if encode_set.include?(c) || c.ord > 0x7e
-        return c.unpack("C*").map { |b| sprintf("%%%02X", b) }.join
-      end
-      c
+      return c unless encode_set.include?(c) || c.ord > 0x7e
+
+      # For ASCII single-byte characters
+      return "%%%02X" % c.ord if c.bytesize == 1
+
+      c.bytes.map { |b| "%%%02X" % b }.join
     end
   end
 end
