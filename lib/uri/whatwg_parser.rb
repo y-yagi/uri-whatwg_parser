@@ -34,20 +34,21 @@ module URI
       {}
     end
 
-    def parse(uri, base = nil) # :nodoc:
+    def parse(uri, base = nil, encoding = Encoding::UTF_8) # :nodoc:
       reset
-      URI.for(*self.split(uri, base))
+      URI.for(*self.split(uri, base, encoding))
     end
 
-    def split(uri, base = nil) # :nodoc:
+    def split(uri, base = nil, encoding = Encoding::UTF_8) # :nodoc:
       @base = nil
       if base != nil
-        ary = split(base)
+        ary = split(base, nil, encoding)
         @base = { scheme: ary[0], userinfo: ary[1], host: ary[2], port: ary[3], registry: ary[4], path: ary[5], opaque: ary[6], query: ary[7], fragment: ary[8]}
         @base_paths = @paths
         reset
       end
 
+      @encoding = encoding
       @uri = uri.dup
       @uri.sub!(/\A[\u0000-\u0020]*/, "")
       @uri.sub!(/[\u0000-\u0020]*\z/, "")
@@ -241,7 +242,7 @@ module URI
             next
           end
 
-          encoded_char = percent_encode(char, USERINFO_PERCENT_ENCODE_SET)
+          encoded_char = percent_encode(char, USERINFO_PERCENT_ENCODE_SET, @encoding)
 
           if @password_token_seen
             @password = @password.to_s + encoded_char
@@ -420,7 +421,7 @@ module URI
           @state = :fragment_state
         end
       else
-        @buffer << percent_encode(c, PATH_PERCENT_ENCODE_SET)
+        @buffer << percent_encode(c, PATH_PERCENT_ENCODE_SET, @encoding)
       end
     end
 
@@ -438,14 +439,18 @@ module URI
           @parse_result[:path] = @parse_result[:path].to_s + " "
         end
       elsif !c.nil?
-        @parse_result[:path] = @parse_result[:path].to_s + percent_encode(c, C0_CONTROL_PERCENT_ENCODE_SET)
+        @parse_result[:path] = @parse_result[:path].to_s + percent_encode(c, C0_CONTROL_PERCENT_ENCODE_SET, @encoding)
       end
     end
 
     def query_state(c)
+      if @encoding != Encoding::UTF_8 && (!special_url? || %w[ws wss].include?(@parse_result[:scheme]))
+        @encoding = Encoding::UTF_8
+      end
+
       if c.nil? || c == "#"
         query_percent_encode_set = special_url? ? SPECIAL_QUERY_PERCENT_ENCODE_SET : QUERY_PERCENT_ENCODE_SET
-        @parse_result[:query] = @buffer.chars.map { |c| percent_encode(c, query_percent_encode_set) }.join
+        @parse_result[:query] = @buffer.chars.map { |c| percent_encode(c, query_percent_encode_set, @encoding) }.join
         @buffer.clear
         @state = :fragment_state if c == "#"
       elsif !c.nil?
@@ -455,7 +460,7 @@ module URI
 
     def fragment_state(c)
       return if c.nil?
-      @parse_result[:fragment] = @parse_result[:fragment].to_s + percent_encode(c, FRAGMENT_PERCENT_ENCODE_SET)
+      @parse_result[:fragment] = @parse_result[:fragment].to_s + percent_encode(c, FRAGMENT_PERCENT_ENCODE_SET, @encoding)
     end
 
     def windows_drive_letter?(str)

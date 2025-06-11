@@ -18,13 +18,14 @@ class URI::WhatwgParser
       ASCII_DIGIT.include?(c)
     end
 
-    def percent_encode(c, encode_set)
+    def percent_encode(c, encode_set, encoding = Encoding::UTF_8)
       return c unless encode_set.include?(c) || c.ord > 0x7e
 
       # For ASCII single-byte characters
       return "%%%02X" % c.ord if c.bytesize == 1
 
-      c.bytes.map { |b| "%%%02X" % b }.join
+      bytes = c.encoding == encoding ? c.bytes : c.encode(encoding).bytes
+      bytes.map { |b| "%%%02X" % b }.join
     end
   end
 end
