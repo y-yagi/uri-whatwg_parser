@@ -33,7 +33,6 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 * Support state override
 * Support validations
-* Support encodings other than UTF-8
 
 ## Contributing
 
