@@ -444,6 +444,10 @@ module URI
     end
 
     def query_state(c)
+      if @encoding != Encoding::UTF_8 && (!special_url? || %w[ws wss].include?(@parse_result[:scheme]))
+        @encoding = Encoding::UTF_8
+      end
+
       if c.nil? || c == "#"
         query_percent_encode_set = special_url? ? SPECIAL_QUERY_PERCENT_ENCODE_SET : QUERY_PERCENT_ENCODE_SET
         @parse_result[:query] = @buffer.chars.map { |c| percent_encode(c, query_percent_encode_set, @encoding) }.join
