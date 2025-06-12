@@ -1,3 +1,7 @@
+## 0.1.4
+
+* Support passing `encoding` option
+
 ## 0.1.3
 
 * Improve performance of parsing
