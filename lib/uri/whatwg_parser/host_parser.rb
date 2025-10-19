@@ -227,7 +227,7 @@ class URI::WhatwgParser
       validation_error = false
       r = 10
 
-      if str.size >= 2 && (str.start_with?("0x") || str.start_with?("0X"))
+      if str.size >= 2 && str.start_with?("0x", "0X")
         validation_error  = true
         str = str[2..-1]
         r = 16

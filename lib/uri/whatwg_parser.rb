@@ -433,7 +433,7 @@ module URI
         @parse_result[:fragment] = nil
         @state = :fragment_state
       elsif c == " "
-        if rest.start_with?("?") || rest.start_with?("#")
+        if rest.start_with?("?", "#")
           @parse_result[:path] = @parse_result[:path].to_s + "%20"
         else
           @parse_result[:path] = @parse_result[:path].to_s + " "
