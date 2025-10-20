@@ -126,12 +126,12 @@ module URI
           @state = :path_or_authority_state
           @pos += 1
         else
-          @parse_result[:path] = nil
+          @paths = []
           @state = :opaque_path_state
         end
       else
         @buffer.clear
-        @pos -= 1
+        @pos = -1
         @state = :no_scheme_state
       end
     end
@@ -141,7 +141,7 @@ module URI
 
       if !@base[:opaque].nil? && c == "#"
         @parse_result[:scheme] = @base[:scheme]
-        @parse_result[:path] = @base[:path]
+        @paths = @base_paths
         @parse_result[:query] = @base[:query]
         @parse_result[:fragment] = nil
         @state = :fragment_state
@@ -180,10 +180,11 @@ module URI
       elsif special_url? && c == "\\"
         @state = :relative_slash_state
       else
+
         @parse_result[:userinfo] = @base[:userinfo]
         @parse_result[:host] = @base[:host]
         @parse_result[:port] = @base[:port]
-        @parse_result[:path] = @base[:path]
+        @paths = @base_paths
         @parse_result[:query] = @base[:query]
 
         if c == "?"
@@ -408,6 +409,7 @@ module URI
           if @parse_result[:scheme] == "file" && @paths.empty? && windows_drive_letter?(@buffer)
             @buffer[1] = ":"
           end
+
           @paths << @buffer
         end
 
@@ -426,6 +428,7 @@ module URI
     end
 
     def opaque_path_state(c)
+      @paths ||= []
       if c == "?"
         @parse_result[:query] = nil
         @state = :query_state
@@ -434,12 +437,12 @@ module URI
         @state = :fragment_state
       elsif c == " "
         if rest.start_with?("?", "#")
-          @parse_result[:path] = @parse_result[:path].to_s + "%20"
+          @paths << "%20"
         else
-          @parse_result[:path] = @parse_result[:path].to_s + " "
+          @paths << " "
         end
       elsif !c.nil?
-        @parse_result[:path] = @parse_result[:path].to_s + percent_encode(c, C0_CONTROL_PERCENT_ENCODE_SET, @encoding)
+        @paths.append(percent_encode(c, C0_CONTROL_PERCENT_ENCODE_SET, @encoding))
       end
     end
 
@@ -488,10 +491,10 @@ module URI
     end
 
     def shorten_url_path
-      return if @parse_result[:path]&.empty?
+      return if @paths.nil?
 
-      return true if @parse_result[:scheme] == "file" && @parse_result[:path]&.length == 1 && normalized_windows_drive_letter?(@parse_result[:path])
-      @parse_result[:path]&.chomp!
+      return true if @parse_result[:scheme] == "file" && @paths.length == 1 && normalized_windows_drive_letter?(@paths.first)
+      @paths.pop
     end
 
     def rest

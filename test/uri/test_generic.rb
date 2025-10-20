@@ -20,7 +20,7 @@ class URI::TestGenericTest < Test::Unit::TestCase
     uri = URI.join("http://www.ruby-lang.org/", "/ja/man-1.6/")
     assert_equal uri.to_s, "http://www.ruby-lang.org/ja/man-1.6/"
 
-    uri = URI.join("http://www.ruby-lang.org/", "/ja/man-1.6/" "b")
+    uri = URI.join("http://www.ruby-lang.org/", "/ja/man-1.6/", "b")
     assert_equal uri.to_s, "http://www.ruby-lang.org/ja/man-1.6/b"
   end
 end
