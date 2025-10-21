@@ -69,6 +69,9 @@ module URI
       @parse_result[:userinfo] = "#{@username}:#{@password}" if !@username.nil? || !@password.nil?
       @parse_result[:path] = "/#{@paths.join("/")}" if @paths && !@paths.empty?
 
+      # FIXME: URI::MailTo requires opaque. I need to check whether passing `path` is a good to way to fix.
+      # https://github.com/ruby/uri/blob/52077e9b07c555de6ad7ee74663b988fa38ca545/lib/uri/mailto.rb#L145-L148.
+      @parse_result[:opaque] = @parse_result[:path] if @parse_result[:scheme] == "mailto"
       @parse_result.values
     end
 
