@@ -11,6 +11,10 @@ class URI::TestGenericTest < Test::Unit::TestCase
     assert_equal "/posts", uri.path
     assert_equal "id=30&limit=5", uri.query
     assert_equal "time=1305298413", uri.fragment
+
+    uri = URI.parse("mailto:example@example.com")
+    assert_equal "mailto", uri.scheme
+    assert_equal "example@example.com", uri.path
   end
 
   def test_join
