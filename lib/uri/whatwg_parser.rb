@@ -397,7 +397,6 @@ module URI
       @paths ||= []
 
       if (c.nil? || c == "/") || (special_url? && c == "\/") || (c == "?" || c == "#")
-
         if double_dot_path_segments?(@buffer)
           shorten_url_path
           if c != "/" || (special_url? && c == "\/")
@@ -442,7 +441,7 @@ module URI
           @paths << " "
         end
       elsif !c.nil?
-        @paths.append(percent_encode(c, C0_CONTROL_PERCENT_ENCODE_SET, @encoding))
+        @parse_result[:path] = @parse_result[:path].to_s + percent_encode(c, C0_CONTROL_PERCENT_ENCODE_SET, @encoding)
       end
     end
 
