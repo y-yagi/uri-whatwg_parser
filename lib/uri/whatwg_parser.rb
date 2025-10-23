@@ -69,9 +69,6 @@ module URI
       @parse_result[:userinfo] = "#{@username}:#{@password}" if !@username.nil? || !@password.nil?
       @parse_result[:path] = "/#{@paths.join("/")}" if @paths && !@paths.empty?
 
-      # FIXME: URI::MailTo requires opaque. I need to check whether passing `path` is a good to way to fix.
-      # https://github.com/ruby/uri/blob/52077e9b07c555de6ad7ee74663b988fa38ca545/lib/uri/mailto.rb#L145-L148.
-      @parse_result[:opaque] = @parse_result[:path] if @parse_result[:scheme] == "mailto"
       @parse_result.values
     end
 
@@ -129,7 +126,7 @@ module URI
           @state = :path_or_authority_state
           @pos += 1
         else
-          @paths = []
+          @parse_result[:opaque] = ""
           @state = :opaque_path_state
         end
       else
@@ -140,7 +137,7 @@ module URI
     end
 
     def no_scheme_state(c)
-      raise ParseError, "scheme is missing" if @base.nil? || !@base[:opaque].nil? && c != "#"
+      raise ParseError, "scheme is missing" if @base.nil? || (!@base[:opaque].nil? && c != "#")
 
       if !@base[:opaque].nil? && c == "#"
         @parse_result[:scheme] = @base[:scheme]
@@ -430,7 +427,6 @@ module URI
     end
 
     def opaque_path_state(c)
-      @paths ||= []
       if c == "?"
         @parse_result[:query] = nil
         @state = :query_state
@@ -439,12 +435,12 @@ module URI
         @state = :fragment_state
       elsif c == " "
         if rest.start_with?("?", "#")
-          @paths << "%20"
+          @parse_result[:opaque] += "%20"
         else
-          @paths << " "
+          @parse_result[:opaque] += " "
         end
       elsif !c.nil?
-        @parse_result[:path] = @parse_result[:path].to_s + percent_encode(c, C0_CONTROL_PERCENT_ENCODE_SET, @encoding)
+        @parse_result[:opaque] += percent_encode(c, C0_CONTROL_PERCENT_ENCODE_SET, @encoding)
       end
     end
 

@@ -14,7 +14,7 @@ class URI::TestGenericTest < Test::Unit::TestCase
 
     uri = URI.parse("mailto:example@example.com")
     assert_equal "mailto", uri.scheme
-    assert_equal "example@example.com", uri.path
+    assert_equal "example@example.com", uri.to
   end
 
   def test_join
