@@ -27,4 +27,9 @@ class URI::TestGenericTest < Test::Unit::TestCase
     uri = URI.join("http://www.ruby-lang.org/", "/ja/man-1.6/", "b")
     assert_equal uri.to_s, "http://www.ruby-lang.org/ja/man-1.6/b"
   end
+
+  def test_route_to
+    uri = URI.parse('http://my.example.com')
+    assert_equal "main.rbx?page=1", uri.route_to("http://my.example.com/main.rbx?page=1").to_s
+  end
 end

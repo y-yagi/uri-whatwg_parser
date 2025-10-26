@@ -498,6 +498,17 @@ module URI
     def rest
       @uri[@pos+1..]
     end
+
+    def convert_to_uri(uri)
+      if uri.is_a?(URI::Generic)
+        uri
+      elsif uri = String.try_convert(uri)
+        parse(uri)
+      else
+        raise ArgumentError,
+          "bad argument (expected URI object or URI string)"
+      end
+    end
   end
 end
 
