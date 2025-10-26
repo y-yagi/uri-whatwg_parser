@@ -1,3 +1,8 @@
+## 0.1.6
+
+* Fix `opaque` part parsing
+* Correctly join multiple paths
+
 ## 0.1.5
 
 * Remove `ipaddr` dependency
