@@ -18,7 +18,8 @@ class URI::WhatwgParser::TestURLTest < Test::Unit::TestCase
         end
       else
         ary = parser.split(testdata["input"], testdata["base"])
-        parse_result = { scheme: ary[0], userinfo: ary[1], host: ary[2], port: ary[3], registry: ary[4], path: ary[5], opaque: ary[6], query: ary[7], fragment: ary[8]}
+        names = %i[scheme userinfo host port registry path opaque query fragment]
+        parse_result = names.zip(ary).to_h
         assert_equal testdata["protocol"], parse_result[:scheme].to_s + ":", "[protocol]"
         assert_equal testdata["hostname"], parse_result[:host].to_s, "[hostname]"
         assert_equal testdata["port"], parse_result[:port].to_s, "[port]"
