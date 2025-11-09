@@ -27,7 +27,8 @@ class URI::WhatwgParser::TestURLTest < Test::Unit::TestCase
         assert_equal testdata["hash"], "##{parse_result[:fragment]}", "[hash]" unless testdata["hash"].empty?
         assert_equal testdata["search"], "?#{parse_result[:query]}", "[search]" unless testdata["search"].empty?
         if !testdata["username"].empty? || !testdata["password"].empty?
-          assert_equal "#{testdata["username"]}:#{testdata["password"]}", parse_result[:userinfo], "[username:password]"
+          username = [testdata["username"], testdata["password"]].compact.reject(&:empty?).join(":")
+          assert_equal username, parse_result[:userinfo], "[username:password]"
         end
       end
     end

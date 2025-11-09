@@ -67,7 +67,7 @@ module URI
         @pos += 1
       end
 
-      @parse_result[:userinfo] = "#{@username}:#{@password}" if !@username.nil? || !@password.nil?
+      @parse_result[:userinfo] = [@username, @password].compact.reject(&:empty?).join(":")
       @parse_result[:path] = "/#{@paths.join("/")}" if @paths && !@paths.empty?
 
       @parse_result.values

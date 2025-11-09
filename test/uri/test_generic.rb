@@ -4,13 +4,14 @@ require "test_helper"
 
 class URI::TestGenericTest < Test::Unit::TestCase
   def test_parse
-    uri = URI.parse("http://foo.com/posts?id=30&limit=5#time=1305298413")
+    uri = URI.parse("http://john.doe@foo.com/posts?id=30&limit=5#time=1305298413")
     assert_equal "http", uri.scheme
     assert_equal "foo.com", uri.host
     assert_equal 80, uri.port
     assert_equal "/posts", uri.path
     assert_equal "id=30&limit=5", uri.query
     assert_equal "time=1305298413", uri.fragment
+    assert_equal "john.doe", uri.userinfo
 
     uri = URI.parse("mailto:example@example.com")
     assert_equal "mailto", uri.scheme
