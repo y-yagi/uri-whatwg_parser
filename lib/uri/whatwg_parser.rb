@@ -36,11 +36,11 @@ module URI
     end
 
     def parse(uri, base = nil, encoding = Encoding::UTF_8) # :nodoc:
-      reset
       URI.for(*self.split(uri, base, encoding))
     end
 
     def split(uri, base = nil, encoding = Encoding::UTF_8) # :nodoc:
+      reset
       @base = nil
       if base != nil
         ary = split(base, nil, encoding)

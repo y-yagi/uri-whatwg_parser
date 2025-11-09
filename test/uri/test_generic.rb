@@ -44,4 +44,20 @@ class URI::TestGenericTest < Test::Unit::TestCase
     uri = URI.parse("http://foo") + "a.html"
     assert_equal "http://foo/a.html", uri.to_s
   end
+
+  def test_split
+    result = URI.split("https://john.doe@www.example.com:123/forum/questions/?tag=networking&order=newest#top")
+    assert_equal "https", result[0]
+    assert_equal "john.doe", result[1]
+    assert_equal "www.example.com", result[2]
+    assert_equal 123, result[3]
+    assert_nil result[4]
+    assert_equal "/forum/questions/", result[5]
+    assert_nil result[6]
+    assert_equal "tag=networking&order=newest", result[7]
+    assert_equal "top", result[8]
+
+    result = URI.split("http://john.doe@www.example.com:123/forum/questions/?tag=networking&order=newest#top")
+    assert_equal "http", result[0]
+  end
 end
