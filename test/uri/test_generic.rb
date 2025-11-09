@@ -32,4 +32,15 @@ class URI::TestGenericTest < Test::Unit::TestCase
     uri = URI.parse('http://my.example.com')
     assert_equal "main.rbx?page=1", uri.route_to("http://my.example.com/main.rbx?page=1").to_s
   end
+
+  def test_merge
+    uri = URI.parse("http://foo")
+    assert_equal "http://foo/bar", uri.merge("/bar").to_s
+
+    uri = URI.parse("http://foo")
+    assert_equal "http://bar/", uri.merge("http://bar").to_s
+
+    uri = URI.parse("http://foo") + "a.html"
+    assert_equal "http://foo/a.html", uri.to_s
+  end
 end

@@ -5,6 +5,7 @@ require_relative "whatwg_parser/error"
 require_relative "whatwg_parser/version"
 require_relative "whatwg_parser/parser_helper"
 require_relative "whatwg_parser/host_parser"
+require_relative "whatwg_parser/generic"
 
 module URI
   class WhatwgParser
