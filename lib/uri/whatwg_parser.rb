@@ -67,7 +67,7 @@ module URI
         @pos += 1
       end
 
-      @parse_result[:userinfo] = "#{@username}:#{@password}" if !@username.nil? || !@password.nil?
+      @parse_result[:userinfo] = [@username, @password].compact.reject(&:empty?).join(":")
       @parse_result[:path] = "/#{@paths.join("/")}" if @paths && !@paths.empty?
 
       @parse_result.values
@@ -181,8 +181,7 @@ module URI
       elsif special_url? && c == "\\"
         @state = :relative_slash_state
       else
-
-        @parse_result[:userinfo] = @base[:userinfo]
+        @username, @password = @base[:userinfo].split(":") if @base[:userinfo]
         @parse_result[:host] = @base[:host]
         @parse_result[:port] = @base[:port]
         @paths = @base_paths
@@ -209,7 +208,7 @@ module URI
       elsif c == "/"
         @state = :authority_state
       else
-        @parse_result[:userinfo] = @base[:userinfo]
+        @username, @password = @base[:userinfo].split(":") if @base[:userinfo]
         @parse_result[:host] = @base[:host]
         @parse_result[:port] = @base[:port]
         @state = :path_state
