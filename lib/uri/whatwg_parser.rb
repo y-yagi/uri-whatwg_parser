@@ -181,8 +181,7 @@ module URI
       elsif special_url? && c == "\\"
         @state = :relative_slash_state
       else
-
-        @parse_result[:userinfo] = @base[:userinfo]
+        @username, @password = @base[:userinfo].split(":") if @base[:userinfo]
         @parse_result[:host] = @base[:host]
         @parse_result[:port] = @base[:port]
         @paths = @base_paths
@@ -209,7 +208,7 @@ module URI
       elsif c == "/"
         @state = :authority_state
       else
-        @parse_result[:userinfo] = @base[:userinfo]
+        @username, @password = @base[:userinfo].split(":") if @base[:userinfo]
         @parse_result[:host] = @base[:host]
         @parse_result[:port] = @base[:port]
         @state = :path_state
