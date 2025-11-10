@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    uri-whatwg_parser (0.1.6)
+    uri-whatwg_parser (0.1.7)
       uri (>= 1.0.0)
       uri-idna
 

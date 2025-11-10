@@ -1,3 +1,9 @@
+## 0.1.7
+
+* Allow to call `URI.split` multiple times
+* Fix parsing a username without a password
+* Support `#merge` method
+
 ## 0.1.6
 
 * Fix `opaque` part parsing
