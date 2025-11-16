@@ -3,6 +3,46 @@ require "uri/generic"
 module URI
   class WhatwgParser
     module Generic
+      def initialize(scheme,
+                     userinfo, host, port, registry,
+                     path, opaque,
+                     query,
+                     fragment,
+                     parser = DEFAULT_PARSER,
+                     arg_check = false)
+        @scheme = nil
+        @user = nil
+        @password = nil
+        @host = nil
+        @port = nil
+        @path = nil
+        @query = nil
+        @opaque = nil
+        @fragment = nil
+        @parser = parser == DEFAULT_PARSER ? nil : parser
+
+        self.set_scheme(scheme)
+        self.set_host(host)
+        self.set_port(port)
+        self.set_userinfo(userinfo)
+        self.set_path(path)
+        self.query = query
+        self.set_opaque(opaque)
+        self.fragment=(fragment)
+
+        self.set_path("") if !@path && !@opaque
+        DEFAULT_PARSER.parse(to_s) if arg_check
+
+        if registry
+          raise InvalidURIError,
+            "the scheme #{@scheme} does not accept registry part: #{registry} (or bad hostname?)"
+        end
+
+        @scheme&.freeze
+        self.set_port(self.default_port) if self.default_port && !@port
+      end
+
+
       def merge(oth)
         URI::DEFAULT_PARSER.join(self.to_s, oth.to_s)
       end
