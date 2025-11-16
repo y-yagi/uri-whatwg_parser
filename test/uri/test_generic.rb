@@ -81,4 +81,24 @@ class URI::TestGenericTest < Test::Unit::TestCase
       uri.opaque = "a"
     end
   end
+
+  def test_build
+    uri = URI::HTTP.build(host: "www.example.com")
+    assert_equal "http://www.example.com", uri.to_s
+
+    uri = URI::HTTP.build(host: "www.example.com", path: "/index.html", query: "id=10")
+    assert_equal "http://www.example.com/index.html?id=10", uri.to_s
+
+    # Test all possible arguments
+    uri = URI::HTTP.build(
+      scheme: "http",
+      host: "www.example.com",
+      port: 8080,
+      path: "/foo/bar",
+      query: "x=1&y=2",
+      fragment: "frag",
+      userinfo: "user:pass"
+    )
+    assert_equal "http://user:pass@www.example.com:8080/foo/bar?x=1&y=2#frag", uri.to_s
+  end
 end
