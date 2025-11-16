@@ -60,4 +60,25 @@ class URI::TestGenericTest < Test::Unit::TestCase
     result = URI.split("http://john.doe@www.example.com:123/forum/questions/?tag=networking&order=newest#top")
     assert_equal "http", result[0]
   end
+
+  def test_setters
+    uri = URI.parse("http://example.com")
+
+    uri.scheme = "https"
+    assert_equal "https", uri.scheme
+    uri.user = "john.doe"
+    assert_equal "john.doe", uri.user
+    uri.password = "s3cr3t"
+    assert_equal "s3cr3t", uri.password
+    uri.host = "www.example.com"
+    assert_equal "www.example.com", uri.host
+    uri.port = 8443
+    assert_equal 8443, uri.port
+    uri.path = "/index.html"
+    assert_equal "/index.html", uri.path
+
+    assert_raises(URI::InvalidURIError) do
+      uri.opaque = "a"
+    end
+  end
 end
