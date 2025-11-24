@@ -1,3 +1,8 @@
+## 0.1.8
+
+* Support `.build` method
+* Support setter methods
+
 ## 0.1.7
 
 * Allow to call `URI.split` multiple times
