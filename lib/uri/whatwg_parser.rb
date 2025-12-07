@@ -96,7 +96,6 @@ module URI
       @username = nil
       @password = nil
       @parse_result = { scheme: nil, userinfo: nil, host: nil, port: nil, registry: nil, path: nil, opaque: nil, query: nil, fragment: nil }
-      @force_continue = false
       @state = :scheme_start_state
     end
 
