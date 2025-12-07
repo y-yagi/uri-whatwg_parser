@@ -35,11 +35,11 @@ module URI
       {}
     end
 
-    def parse(uri, base: nil, encoding: Encoding::UTF_8) # :nodoc:
-      URI.for(*self.split(uri, base: base, encoding: encoding))
+    def parse(input, base: nil, encoding: Encoding::UTF_8, url: nil, state_override: nil) # :nodoc:
+      URI.for(*self.split(input, base: base, encoding: encoding, url: url, state_override: state_override))
     end
 
-    def split(uri, base: nil, encoding: Encoding::UTF_8) # :nodoc:
+    def split(input, base: nil, encoding: Encoding::UTF_8, url: nil, state_override: nil) # :nodoc:
       reset
       @base = nil
       if base != nil
@@ -49,27 +49,39 @@ module URI
         reset
       end
 
-      @encoding = encoding
-      @uri = uri.dup
-      @uri.sub!(/\A[\u0000-\u0020]*/, "")
-      @uri.sub!(/[\u0000-\u0020]*\z/, "")
-      @uri.delete!("\t")
-      @uri.delete!("\n")
-      @uri.delete!("\r")
+      if url
+        raise ArgumentError, "bad argument (expected URI object)" unless url.is_a?(URI::Generic)
+        @parse_result.merge!(url.component.zip(url.send(:component_ary)).to_h)
+        @paths = @parse_result[:path]&.split("/") || []
+      end
 
-      raise ParseError, "uri can't be empty" if uri.empty? && @base.nil?
+      if state_override
+        @state = state_override.to_sym
+        @state_override = @state
+        raise ArgumentError, "state override is invalid" if !state_override.to_s.end_with?("_state") || !respond_to?(@state_override, private: true)
+      end
+
+      @encoding = encoding
+      @input = input.dup
+      @input.sub!(/\A[\u0000-\u0020]*/, "")
+      @input.sub!(/[\u0000-\u0020]*\z/, "")
+      @input.delete!("\t")
+      @input.delete!("\n")
+      @input.delete!("\r")
+
+      raise ParseError, "uri can't be empty" if input.empty? && @base.nil?
 
       @pos = 0
 
-      while @pos <= @uri.length
-        c = @uri[@pos]
-        send(@state, c)
+      while @pos <= @input.length
+        c = @input[@pos]
+        ret = send(@state, c)
+        break if ret == false
         @pos += 1
       end
 
       @parse_result[:userinfo] = [@username, @password].compact.reject(&:empty?).join(":")
       @parse_result[:path] = "/#{@paths.join("/")}" if @paths && !@paths.empty?
-
       @parse_result.values
     end
 
@@ -96,6 +108,7 @@ module URI
       @username = nil
       @password = nil
       @parse_result = { scheme: nil, userinfo: nil, host: nil, port: nil, registry: nil, path: nil, opaque: nil, query: nil, fragment: nil }
+      @state_override = nil
       @state = :scheme_start_state
     end
 
@@ -103,7 +116,7 @@ module URI
       if ascii_alpha?(c)
         @buffer << c.downcase
         @state = :scheme_state
-      else
+      elsif @state_override.nil?
         @pos -= 1
         @state = :no_scheme_state
       end
@@ -113,7 +126,22 @@ module URI
       if ascii_alphanumerica?(c) || ["+", "-", "."].include?(c)
         @buffer << c.downcase
       elsif c == ":"
+        if @state_override
+          return false if special_url? && !special_url?(@buffer)
+          return false if !special_url? && special_url?(@buffer)
+          return false if (includes_credentials? || @parse_result[:port].empty?) && @buffer == "file"
+          return false if @parse_result[:scheme] == "file" && @parse_result[:host]&.empty?
+        end
+
         @parse_result[:scheme] = @buffer
+
+        if @state_override
+          if SPECIAL_SCHEME.value?(@parse_result[:port].to_i)
+            @parse_result[:port] = nil
+          end
+          return false
+        end
+
         @buffer = +""
 
         if @parse_result[:scheme] == "file"
@@ -129,10 +157,12 @@ module URI
           @parse_result[:opaque] = ""
           @state = :opaque_path_state
         end
-      else
+      elsif @state_override.nil?
         @buffer.clear
         @pos = -1
         @state = :no_scheme_state
+      else
+        raise ParseError, "parsing scheme failed"
       end
     end
 
@@ -264,8 +294,12 @@ module URI
     end
 
     def host_state(c)
-      if c == ":" && !@inside_brackets
+      if @state_override && @parse_result[:scheme] == "file"
+        @pos -= 1
+        @state = :file_host_state
+      elsif c == ":" && !@inside_brackets
         raise ParseError, "host is missing" if @buffer.empty?
+        raise ParseError, "invalid host" if @state_override && @state_override == :host_state
 
         @parse_result[:host] = @host_parser.parse(@buffer, !special_url?)
         @buffer.clear
@@ -274,10 +308,13 @@ module URI
         @pos -= 1
         if special_url? && @buffer.empty?
           raise ParseError, "host is missing"
+        elsif @state_override && @buffer.empty? && (includes_credentials? || !@parse_result[:port].empty?)
+          raise ParseError, "invalid host"
         else
           @parse_result[:host] = @host_parser.parse(@buffer, !special_url?)
           @buffer.clear
           @state = :path_start_state
+          return if @state_override
         end
       else
         @inside_brackets = true if c == "["
@@ -289,7 +326,7 @@ module URI
     def port_state(c)
       if ascii_digit?(c)
         @buffer << c
-      elsif c.nil? || ["/", "?", "#"].include?(c) || (special_url? && c == "\\")
+      elsif c.nil? || ["/", "?", "#"].include?(c) || (special_url? && c == "\\") || @state_override
         unless @buffer.empty?
           begin
             port = Integer(@buffer, 10)
@@ -300,8 +337,10 @@ module URI
           end
 
           @buffer.clear
+          return if @state_override
         end
 
+        raise ParseError, "invalid host" if @state_override
         @state = :path_start_state
         @pos -= 1
       else
@@ -359,10 +398,11 @@ module URI
       if c.nil? || c == "/" || c == "\\" || c == "?" || c == "#"
         @pos -= 1
 
-        if windows_drive_letter?(@buffer)
+        if !@state_override && windows_drive_letter?(@buffer)
           @state = :path_state
         elsif @buffer.empty?
           @parse_result[:host] = nil
+          return if @state_override
           @state = :path_start_state
         else
           host = @host_parser.parse(@buffer, !special_url?)
@@ -370,6 +410,7 @@ module URI
             @parse_result[:host] = host
           end
 
+          return if @state_override
           @buffer.clear
           @state = :path_start_state
         end
@@ -382,20 +423,22 @@ module URI
       if special_url?
         @pos -= 1 if c != "/" && c != "\\"
         @state = :path_state
-      elsif c == "?"
+      elsif !@state_override && c == "?"
         @state = :query_state
-      elsif c == "#"
+      elsif !@state_override && c == "#"
         @state = :fragment_state
       elsif c != nil
         @pos -= 1 if c != "/"
         @state = :path_state
+      elsif @state_override && @parse_result[:host]&.empty?
+        @paths << ""
       end
     end
 
     def path_state(c)
       @paths ||= []
 
-      if (c.nil? || c == "/") || (special_url? && c == "\/") || (c == "?" || c == "#")
+      if (c.nil? || c == "/") || (special_url? && c == "\/") || (!@state_override && (c == "?" || c == "#"))
         if double_dot_path_segments?(@buffer)
           shorten_url_path
           if c != "/" || (special_url? && c == "\/")
@@ -448,7 +491,7 @@ module URI
         @encoding = Encoding::UTF_8
       end
 
-      if c.nil? || c == "#"
+      if c.nil? || (!@state_override && c == "#")
         query_percent_encode_set = special_url? ? SPECIAL_QUERY_PERCENT_ENCODE_SET : QUERY_PERCENT_ENCODE_SET
         @parse_result[:query] = @buffer.chars.map { |c| percent_encode(c, query_percent_encode_set, @encoding) }.join
         @buffer.clear
@@ -475,8 +518,8 @@ module URI
       NORMALIZED_WINDOWS_DRIVE_LETTER.match?(str)
     end
 
-    def special_url?
-      SPECIAL_SCHEME.key?(@parse_result[:scheme])
+    def special_url?(str = @parse_result[:scheme])
+      SPECIAL_SCHEME.key?(str)
     end
 
     def single_dot_path_segments?(c)
@@ -494,8 +537,12 @@ module URI
       @paths.pop
     end
 
+    def includes_credentials?
+      !@username&.empty? || !@password&.empty?
+    end
+
     def rest
-      @uri[@pos+1..]
+      @input[@pos+1..]
     end
 
     def convert_to_uri(uri)

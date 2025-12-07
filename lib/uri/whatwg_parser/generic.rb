@@ -48,10 +48,9 @@ module URI
       end
       alias + merge
 
-      def check_scheme(v)
-        self.set_scheme(v)
-        DEFAULT_PARSER.parse(to_s)
-        true
+      def scheme=(v)
+        URI::DEFAULT_PARSER.parse("#{v}:", url: self, state_override: :scheme_start_state)
+        set_scheme(v)
       end
 
       def check_user(v)
