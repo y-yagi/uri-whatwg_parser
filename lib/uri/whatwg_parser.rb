@@ -35,15 +35,15 @@ module URI
       {}
     end
 
-    def parse(uri, base = nil, encoding = Encoding::UTF_8) # :nodoc:
-      URI.for(*self.split(uri, base, encoding))
+    def parse(uri, base: nil, encoding: Encoding::UTF_8) # :nodoc:
+      URI.for(*self.split(uri, base: base, encoding: encoding))
     end
 
-    def split(uri, base = nil, encoding = Encoding::UTF_8) # :nodoc:
+    def split(uri, base: nil, encoding: Encoding::UTF_8) # :nodoc:
       reset
       @base = nil
       if base != nil
-        ary = split(base, nil, encoding)
+        ary = split(base, base: nil, encoding: encoding)
         @base = { scheme: ary[0], userinfo: ary[1], host: ary[2], port: ary[3], registry: ary[4], path: ary[5], opaque: ary[6], query: ary[7], fragment: ary[8]}
         @base_paths = @paths
         reset
@@ -77,9 +77,9 @@ module URI
       return parse(uris[0]) if uris.size == 1
 
       base, input = uris.shift(2)
-      uri = parse(input.to_s, base.to_s)
+      uri = parse(input.to_s, base: base.to_s)
       uris.each do |input|
-        uri = parse(input.to_s, uri.to_s)
+        uri = parse(input.to_s, base: uri.to_s)
       end
 
       uri
