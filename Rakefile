@@ -11,6 +11,7 @@ end
 task :download_wpt_resources do
   Dir.chdir "test/resources" do
     system("curl -O https://raw.githubusercontent.com/web-platform-tests/wpt/master/url/resources/urltestdata.json", exception: true)
+    system("curl -O https://raw.githubusercontent.com/web-platform-tests/wpt/master/url/resources/setters_tests.json", exception: true)
   end
 end
 
