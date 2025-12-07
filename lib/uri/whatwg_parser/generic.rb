@@ -10,6 +10,9 @@ module URI
                      fragment,
                      parser = DEFAULT_PARSER,
                      arg_check = false)
+
+        return super unless URI::DEFAULT_PARSER.is_a?(URI::WhatwgParser)
+
         @scheme = nil
         @user = nil
         @password = nil
@@ -42,90 +45,92 @@ module URI
         self.set_port(self.default_port) if self.default_port && !@port
       end
 
-
       def merge(oth)
         URI::DEFAULT_PARSER.join(self.to_s, oth.to_s)
       end
       alias + merge
 
-      def check_scheme(v)
-        self.set_scheme(v)
-        DEFAULT_PARSER.parse(to_s)
-        true
+      def scheme=(v)
+        return super unless URI::DEFAULT_PARSER.is_a?(URI::WhatwgParser)
+        return if v.nil? || v.empty?
+
+        parse_result = URI::DEFAULT_PARSER.split("#{v}:", url: self, state_override: :scheme_start_state)
+        set_scheme(parse_result[0])
+        set_port(parse_result[3])
       end
 
-      def check_user(v)
-        if @opaque
-          raise InvalidURIError, "cannot set user with opaque"
-        end
-
+      def user=(v)
+        return super unless URI::DEFAULT_PARSER.is_a?(URI::WhatwgParser)
         return v unless v
 
-        self.set_user(v)
-        DEFAULT_PARSER.parse(to_s)
-        true
-      end
-
-      def set_user(v)
-        super(DEFAULT_PARSER.encode_userinfo(v))
-      end
-
-      def check_password(v, user = @user)
-        if @opaque
-          raise InvalidURIError, "cannot set password with opaque"
+        if host.nil? || host.empty? || scheme == "file"
+          raise InvalidURIError, "cannot set user when host is nil or file schme"
         end
+        set_user(URI::DEFAULT_PARSER.encode_userinfo(v))
+      end
+
+      def password=(v)
+        return super unless URI::DEFAULT_PARSER.is_a?(URI::WhatwgParser)
         return v unless v
 
-        if !user
-          raise InvalidURIError, "password component depends user component"
+        if host.nil? || host.empty? || scheme == "file"
+          raise InvalidURIError, "cannot set password when host is nil or file schme"
         end
-
-        self.set_password(v)
-        DEFAULT_PARSER.parse(to_s)
-        true
+        set_password(URI::DEFAULT_PARSER.encode_userinfo(v))
       end
 
-      def set_password(v)
-        super(DEFAULT_PARSER.encode_userinfo(v))
-      end
-
-      def check_host(v)
-        return v unless v
+      def host=(v)
+        return super unless URI::DEFAULT_PARSER.is_a?(URI::WhatwgParser)
+        return if v.nil?
 
         if @opaque
           raise InvalidURIError, "cannot set host with registry or opaque"
         end
 
-        self.set_host(v)
-        DEFAULT_PARSER.parse(to_s)
-        true
+        parse_result = URI::DEFAULT_PARSER.split(v.to_s, url: self, state_override: :host_state)
+        set_host(parse_result[2])
+        set_port(parse_result[3])
       end
 
-      def check_port(v)
-        return v unless v
+      def port=(v)
+        return super unless URI::DEFAULT_PARSER.is_a?(URI::WhatwgParser)
+        return if v.nil?
 
-        if @opaque
-          raise InvalidURIError, "cannot set port with registry or opaque"
+        if v.to_s.empty?
+          set_port(nil)
+          return
         end
 
-        self.set_port(v)
-        DEFAULT_PARSER.parse(to_s)
-        true
+        if host.nil? || host.empty? || scheme == "file"
+          raise InvalidURIError, "cannot set port when host is nil or scheme is file"
+        end
+
+        parse_result = URI::DEFAULT_PARSER.split("#{v}:", url: self, state_override: :port_state)
+        set_port(parse_result[3])
       end
 
-      def check_path(v)
-        return v unless v
+      def path=(v)
+        return super unless URI::DEFAULT_PARSER.is_a?(URI::WhatwgParser)
+        return if v.nil?
 
         if @opaque
           raise InvalidURIError, "path conflicts with opaque"
         end
 
-        self.set_path(v)
-        DEFAULT_PARSER.parse(to_s)
-        true
+        parse_result = URI::DEFAULT_PARSER.split(v.to_s, url: self, state_override: :path_start_state)
+        set_path(parse_result[5])
+      end
+
+      def userinfo=(userinfo)
+        return super unless URI::DEFAULT_PARSER.is_a?(URI::WhatwgParser)
+
+        user, password = split_userinfo(userinfo)
+        self.user = user
+        self.password = password
       end
 
       def check_opaque(v)
+        return super unless URI::DEFAULT_PARSER.is_a?(URI::WhatwgParser)
         return v unless v
 
         if @host || @port || @user || @path
