@@ -14,10 +14,10 @@ class URI::WhatwgParser::TestURLTest < Test::Unit::TestCase
 
       if testdata["failure"]
         assert_raise URI::WhatwgParser::ParseError do
-          parser.split(testdata["input"], testdata["base"])
+          parser.split(testdata["input"], base: testdata["base"])
         end
       else
-        ary = parser.split(testdata["input"], testdata["base"])
+        ary = parser.split(testdata["input"], base: testdata["base"])
         names = %i[scheme userinfo host port registry path opaque query fragment]
         parse_result = names.zip(ary).to_h
         assert_equal testdata["protocol"], parse_result[:scheme].to_s + ":", "[protocol]"
