@@ -53,16 +53,11 @@ module URI
         set_scheme(v)
       end
 
-      def check_user(v)
-        if @opaque
-          raise InvalidURIError, "cannot set user with opaque"
+      def user=(v)
+        if host.nil? || scheme == "file"
+          raise InvalidURIError, "cannot set user when host is nil or file schme"
         end
-
-        return v unless v
-
-        self.set_user(v)
-        DEFAULT_PARSER.parse(to_s)
-        true
+        set_user(URI::DEFAULT_PARSER.encode_userinfo(v))
       end
 
       def check_password(v, user = @user)
