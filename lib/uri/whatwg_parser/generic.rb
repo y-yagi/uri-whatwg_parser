@@ -60,19 +60,11 @@ module URI
         set_user(URI::DEFAULT_PARSER.encode_userinfo(v))
       end
 
-      def check_password(v, user = @user)
-        if @opaque
-          raise InvalidURIError, "cannot set password with opaque"
+      def password=(v)
+        if host.nil? || scheme == "file"
+          raise InvalidURIError, "cannot set password when host is nil or file schme"
         end
-        return v unless v
-
-        if !user
-          raise InvalidURIError, "password component depends user component"
-        end
-
-        self.set_password(v)
-        DEFAULT_PARSER.parse(to_s)
-        true
+        set_password(URI::DEFAULT_PARSER.encode_userinfo(v))
       end
 
       def check_host(v)
