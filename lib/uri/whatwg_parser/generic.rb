@@ -79,16 +79,13 @@ module URI
         true
       end
 
-      def check_port(v)
-        return v unless v
-
-        if @opaque
-          raise InvalidURIError, "cannot set port with registry or opaque"
+      def port=(v)
+        if host.nil? || scheme == "file"
+          raise InvalidURIError, "cannot set port when host is nil or file schme"
         end
 
-        self.set_port(v)
-        DEFAULT_PARSER.parse(to_s)
-        true
+        URI::DEFAULT_PARSER.parse(v.to_s, url: self, state_override: :port_state) unless v.to_s.empty?
+        set_port(v)
       end
 
       def check_path(v)
