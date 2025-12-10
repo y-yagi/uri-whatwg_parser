@@ -48,37 +48,23 @@ module URI
       end
       alias + merge
 
-      def check_scheme(v)
-        self.set_scheme(v)
-        DEFAULT_PARSER.parse(to_s)
-        true
+      def scheme=(v)
+        URI::DEFAULT_PARSER.parse("#{v}:", url: self, state_override: :scheme_start_state)
+        set_scheme(v)
       end
 
-      def check_user(v)
-        if @opaque
-          raise InvalidURIError, "cannot set user with opaque"
+      def user=(v)
+        if host.nil? || scheme == "file"
+          raise InvalidURIError, "cannot set user when host is nil or file schme"
         end
-
-        return v unless v
-
-        self.set_user(v)
-        DEFAULT_PARSER.parse(to_s)
-        true
+        set_user(URI::DEFAULT_PARSER.encode_userinfo(v))
       end
 
-      def check_password(v, user = @user)
-        if @opaque
-          raise InvalidURIError, "cannot set password with opaque"
+      def password=(v)
+        if host.nil? || scheme == "file"
+          raise InvalidURIError, "cannot set password when host is nil or file schme"
         end
-        return v unless v
-
-        if !user
-          raise InvalidURIError, "password component depends user component"
-        end
-
-        self.set_password(v)
-        DEFAULT_PARSER.parse(to_s)
-        true
+        set_password(URI::DEFAULT_PARSER.encode_userinfo(v))
       end
 
       def check_host(v)
@@ -93,16 +79,13 @@ module URI
         true
       end
 
-      def check_port(v)
-        return v unless v
-
-        if @opaque
-          raise InvalidURIError, "cannot set port with registry or opaque"
+      def port=(v)
+        if host.nil? || scheme == "file"
+          raise InvalidURIError, "cannot set port when host is nil or file schme"
         end
 
-        self.set_port(v)
-        DEFAULT_PARSER.parse(to_s)
-        true
+        URI::DEFAULT_PARSER.parse(v.to_s, url: self, state_override: :port_state) unless v.to_s.empty?
+        set_port(v)
       end
 
       def check_path(v)
