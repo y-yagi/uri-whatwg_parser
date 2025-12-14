@@ -66,6 +66,10 @@ module URI
         true
       end
 
+      def set_user(v)
+        super(DEFAULT_PARSER.encode_userinfo(v))
+      end
+
       def check_password(v, user = @user)
         if @opaque
           raise InvalidURIError, "cannot set password with opaque"
@@ -79,6 +83,10 @@ module URI
         self.set_password(v)
         DEFAULT_PARSER.parse(to_s)
         true
+      end
+
+      def set_password(v)
+        super(DEFAULT_PARSER.encode_userinfo(v))
       end
 
       def check_host(v)

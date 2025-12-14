@@ -68,8 +68,10 @@ class URI::TestGenericTest < Test::Unit::TestCase
     assert_equal "https", uri.scheme
     uri.user = "john.doe"
     assert_equal "john.doe", uri.user
-    uri.password = "s3cr3t"
-    assert_equal "s3cr3t", uri.password
+    uri.user = "ユーザ"
+    assert_equal "%E3%83%A6%E3%83%BC%E3%82%B6", uri.user
+    uri.password = "パスワード"
+    assert_equal "%E3%83%91%E3%82%B9%E3%83%AF%E3%83%BC%E3%83%89", uri.password
     uri.host = "www.example.com"
     assert_equal "www.example.com", uri.host
     uri.port = 8443

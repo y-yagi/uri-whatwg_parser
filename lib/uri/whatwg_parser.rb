@@ -85,6 +85,12 @@ module URI
       uri
     end
 
+    def encode_userinfo(str)
+      str.chars.map do |char|
+        percent_encode(char, USERINFO_PERCENT_ENCODE_SET)
+      end.join
+    end
+
     private
 
     def reset
