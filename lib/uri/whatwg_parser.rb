@@ -49,6 +49,8 @@ module URI
         reset
       end
 
+      raise ParseError, "uri can't be empty" if (uri.nil? || uri.empty?) && @base.nil?
+
       @encoding = encoding
       @uri = uri.dup
       @uri.sub!(/\A[\u0000-\u0020]*/, "")
@@ -56,8 +58,6 @@ module URI
       @uri.delete!("\t")
       @uri.delete!("\n")
       @uri.delete!("\r")
-
-      raise ParseError, "uri can't be empty" if uri.empty? && @base.nil?
 
       @pos = 0
 
