@@ -353,7 +353,12 @@ module URI
         if !@base.nil? && @base[:scheme] == "file"
           @parse_result[:host] = @base[:host]
           if !starts_with_windows_drive_letter?(rest) && @base_paths && normalized_windows_drive_letter?(@base_paths[0])
-            @paths[0] << @base_paths[0]
+            if @paths.nil?
+              @paths ||= []
+              @paths[0] = @base_paths[0]
+            else
+              @paths[0] << @base_paths[0]
+            end
           end
         end
         @state = :path_state
@@ -379,9 +384,9 @@ module URI
           @buffer.clear
           @state = :path_start_state
         end
+      else
+        @buffer << c
       end
-
-      @buffer << c unless c.nil?
     end
 
     def path_start_state(c)

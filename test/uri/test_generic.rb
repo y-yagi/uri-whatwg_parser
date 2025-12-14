@@ -20,6 +20,9 @@ class URI::TestGenericTest < Test::Unit::TestCase
     assert_raises(URI::WhatwgParser::ParseError) do
       URI.parse(nil)
     end
+
+    uri = URI.parse("file://localhost/")
+    assert_equal "file:///", uri.to_s
   end
 
   def test_join
