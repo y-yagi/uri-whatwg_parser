@@ -17,6 +17,11 @@ class URI::TestGenericTest < Test::Unit::TestCase
     assert_equal "mailto", uri.scheme
     assert_equal "example@example.com", uri.to
 
+    uri = URI.parse("nonsense:///test")
+    assert_equal "nonsense:///test", uri.to_s
+    assert_equal "nonsense", uri.scheme
+    assert_equal "/test", uri.path
+
     assert_raises(URI::WhatwgParser::ParseError) do
       URI.parse(nil)
     end

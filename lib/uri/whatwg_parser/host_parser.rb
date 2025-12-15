@@ -11,7 +11,7 @@ class URI::WhatwgParser
     FORBIDDEN_DOMAIN_CODE_POINT = FORBIDDEN_HOST_CODE_POINT + C0_CONTROL_PERCENT_ENCODE_SET + ["%", "\x7f"]
 
     def parse(input, opaque = false) # :nodoc:
-      return if input&.empty?
+      return "" if input&.empty?
 
       if input.start_with?("[")
         raise ParseError, "invalid IPv6 format" unless input.end_with?("]")
