@@ -24,7 +24,7 @@ module URI
 
     WINDOWS_DRIVE_LETTER = Regexp.new("\\A([a-zA-Z][:|])\\z")
     NORMALIZED_WINDOWS_DRIVE_LETTER = Regexp.new("\\A([a-zA-Z][:])\\z")
-    STARTS_WITH_wINDOWS_DRIVE_LETTER = Regexp.new("\\A([a-zA-Z][:|])(?:[/\\?#])?\\z")
+    STARTS_WITH_WINDOWS_DRIVE_LETTER = Regexp.new("\\A([a-zA-Z][:|])(?:[/\\?#])?\\z")
 
     def initialize
       reset
@@ -479,7 +479,7 @@ module URI
     end
 
     def starts_with_windows_drive_letter?(str)
-      STARTS_WITH_wINDOWS_DRIVE_LETTER.match?(str)
+      STARTS_WITH_WINDOWS_DRIVE_LETTER.match?(str)
     end
 
     def normalized_windows_drive_letter?(str)
