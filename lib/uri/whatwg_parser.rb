@@ -409,7 +409,8 @@ module URI
       if (c.nil? || c == "/") || (special_url? && c == "\/") || (c == "?" || c == "#")
         if double_dot_path_segments?(@buffer)
           shorten_url_path
-          if c != "/" || (special_url? && c == "\/")
+
+          if c != "/" || (special_url? && c == "\\")
             @paths << ""
           end
         elsif single_dot_path_segments?(@buffer) && (c != "/" || (special_url? && c == "\/"))
@@ -500,8 +501,7 @@ module URI
 
     def shorten_url_path
       return if @paths.nil?
-
-      return true if @parse_result[:scheme] == "file" && @paths.length == 1 && normalized_windows_drive_letter?(@paths.first)
+      return if @parse_result[:scheme] == "file" && @paths.length == 1 && normalized_windows_drive_letter?(@paths.first)
       @paths.pop
     end
 
