@@ -410,10 +410,10 @@ module URI
         if double_dot_path_segments?(@buffer)
           shorten_url_path
 
-          if c != "/" || (special_url? && c == "\\")
+          if c != "/" && !(special_url? && c == "\\")
             @paths << ""
           end
-        elsif single_dot_path_segments?(@buffer) && (c != "/" || (special_url? && c == "\\"))
+        elsif single_dot_path_segments?(@buffer) && c != "/" && !((special_url? && c == "\\"))
           @paths << ""
         elsif !single_dot_path_segments?(@buffer)
           if @parse_result[:scheme] == "file" && @paths.empty? && windows_drive_letter?(@buffer)
