@@ -198,8 +198,6 @@ class URI::WhatwgParser
       str.gsub(/%[0-9A-Fa-f]{2}/) do |m|
         m[1..2].to_i(16).chr
       end
-    rescue ArgumentError
-      raise ParseError, "including invalid value in host"
     end
 
     def ends_in_number?(domain)
