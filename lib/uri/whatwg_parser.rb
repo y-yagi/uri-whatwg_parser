@@ -403,8 +403,6 @@ module URI
             if @paths.nil?
               @paths ||= []
               @paths[0] = @base_paths[0]
-            else
-              @paths[0] << @base_paths[0]
             end
           end
         end
