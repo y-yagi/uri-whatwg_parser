@@ -12,6 +12,7 @@ module URI
                      arg_check = false)
 
         return super unless URI::DEFAULT_PARSER.is_a?(URI::WhatwgParser)
+        return super if registry
 
         @scheme = nil
         @user = nil
@@ -35,11 +36,6 @@ module URI
 
         self.set_path("") if !@path && !@opaque
         DEFAULT_PARSER.parse(to_s) if arg_check
-
-        if registry
-          raise InvalidURIError,
-            "the scheme #{@scheme} does not accept registry part: #{registry} (or bad hostname?)"
-        end
 
         @scheme&.freeze
         self.set_port(self.default_port) if self.default_port && !@port
