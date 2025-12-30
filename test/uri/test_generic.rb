@@ -55,6 +55,9 @@ class URI::TestGenericTest < Test::Unit::TestCase
   def test_route_to
     uri = URI.parse('http://my.example.com')
     assert_equal "main.rbx?page=1", uri.route_to("http://my.example.com/main.rbx?page=1").to_s
+    assert_raise ArgumentError do
+      uri.route_to(1)
+    end
   end
 
   def test_merge
