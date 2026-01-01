@@ -572,8 +572,10 @@ module URI
       end
     end
   end
+
+  WHATWG_PARSER = URI::WhatwgParser.new
 end
 
 URI.send(:remove_const, :DEFAULT_PARSER) if defined?(URI::DEFAULT_PARSER)
-URI::DEFAULT_PARSER = URI::WhatwgParser.new
+URI::DEFAULT_PARSER = URI::WHATWG_PARSER
 URI.parser = URI::DEFAULT_PARSER
