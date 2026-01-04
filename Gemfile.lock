@@ -15,11 +15,20 @@ GEM
       reline (>= 0.3.8)
     docile (1.4.1)
     erb (6.0.0)
+    ffi (1.17.3-x86_64-linux-gnu)
     io-console (0.8.1)
     irb (1.15.3)
       pp (>= 0.6.0)
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
+    irb-reload (0.1.1)
+      irb (~> 1.13)
+      listen (~> 3.8)
+      logger
+    listen (3.9.0)
+      rb-fsevent (~> 0.10, >= 0.10.3)
+      rb-inotify (~> 0.9, >= 0.9.10)
+    logger (1.7.0)
     memory_profiler (1.1.0)
     power_assert (3.0.1)
     pp (0.6.3)
@@ -29,6 +38,9 @@ GEM
       date
       stringio
     rake (13.3.1)
+    rb-fsevent (0.11.2)
+    rb-inotify (0.11.1)
+      ffi (~> 1.0)
     rdoc (6.15.1)
       erb
       psych (>= 4.0.0)
@@ -56,6 +68,7 @@ DEPENDENCIES
   benchmark-ips
   debug
   irb
+  irb-reload
   memory_profiler
   rake (~> 13.0)
   simplecov
