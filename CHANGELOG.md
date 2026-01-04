@@ -1,3 +1,8 @@
+## 0.2.0
+
+* Fix setter methods compliant with WHATWG URL Living Standard
+* Fix several incorrect parsing processes
+
 ## 0.1.8
 
 * Support `.build` method
