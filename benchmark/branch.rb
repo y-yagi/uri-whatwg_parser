@@ -4,8 +4,8 @@ require "uri/whatwg_parser"
 $VERBOSE = nil
 
 condition = `git name-rev --name-only HEAD`.strip
-if RubyVM::RJIT.enabled?
-  condition += " with RJIT"
+if RubyVM::YJIT.enabled?
+  condition += " with YJIT"
 end
 
 Benchmark.ips do |x|
