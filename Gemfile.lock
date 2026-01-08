@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     uri-whatwg_parser (0.2.0)
-      uri (>= 1.0.0)
+      uri (>= 1.1.0)
       uri-idna
 
 GEM
@@ -15,6 +15,7 @@ GEM
       reline (>= 0.3.8)
     docile (1.4.1)
     erb (6.0.0)
+    ffi (1.17.3)
     ffi (1.17.3-x86_64-linux-gnu)
     io-console (0.8.1)
     irb (1.15.3)
