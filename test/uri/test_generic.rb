@@ -38,7 +38,7 @@ class URI::TestGenericTest < Test::Unit::TestCase
     uri = URI.parse("file://monkey/\\")
     assert_equal "file://monkey//", uri.to_s
 
-    URI::DEFAULT_PARSER.parse("dummy://example.com/?a=あ", encoding: Encoding::SJIS)
+    URI::PARSER.parse("dummy://example.com/?a=あ", encoding: Encoding::SJIS)
   end
 
   def test_join

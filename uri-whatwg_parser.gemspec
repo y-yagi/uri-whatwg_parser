@@ -27,7 +27,7 @@ Gem::Specification.new do |spec|
   spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "uri", ">= 1.0.0"
+  spec.add_dependency "uri", ">= 1.1.0"
   spec.add_dependency "uri-idna"
   spec.add_development_dependency "debug"
 end
