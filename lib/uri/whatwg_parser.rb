@@ -71,9 +71,7 @@ module URI
         @input.sub!(/[\u0000-\u0020]*\z/, "")
       end
 
-      @input.delete!("\t")
-      @input.delete!("\n")
-      @input.delete!("\r")
+      @input.delete!("\t\n\r")
 
       @pos = 0
 
