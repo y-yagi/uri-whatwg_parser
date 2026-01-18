@@ -102,9 +102,9 @@ module URI
     end
 
     def encode_userinfo(str)
-      str.chars.map do |char|
-        percent_encode(char, USERINFO_PERCENT_ENCODE_SET)
-      end.join
+      str.each_char.with_object(+"") do |char, encoded|
+        encoded << percent_encode(char, USERINFO_PERCENT_ENCODE_SET)
+      end
     end
 
     private
@@ -280,7 +280,7 @@ module URI
       if c == "@"
         @buffer.prepend("%40") if @at_sign_seen
         @at_sign_seen = true
-        @buffer.chars.each do |char|
+        @buffer.each_char do |char|
           if char == ":" && !@password_token_seen
             @password_token_seen = true
             next
@@ -510,7 +510,11 @@ module URI
 
       if c.nil? || (!@state_override && c == "#")
         query_percent_encode_set = special_url? ? SPECIAL_QUERY_PERCENT_ENCODE_SET : QUERY_PERCENT_ENCODE_SET
-        @parse_result[:query] = @buffer.chars.map { |c| percent_encode(c, query_percent_encode_set, @encoding) }.join
+        encoded_query = +""
+        @buffer.each_char do |char|
+          encoded_query << percent_encode(char, query_percent_encode_set, @encoding)
+        end
+        @parse_result[:query] = encoded_query
         @buffer.clear
         @state = :fragment_state if c == "#"
       elsif !c.nil?
