@@ -7,23 +7,19 @@ $VERBOSE = nil
 
 Benchmark.ips do |x|
   x.report("WHATWG parse")  do
-    URI::DEFAULT_PARSER = URI::WHATWG_PARSER
-    URI.parse(uri)
+    URI::WHATWG_PARSER.parse(uri)
   end
 
   x.report("WHATWG parse(long uri)")  do
-    URI::DEFAULT_PARSER = URI::WHATWG_PARSER
-    URI.parse(long_uri)
+    URI::WHATWG_PARSER.parse(long_uri)
   end
 
   x.report("RFC3986 parse") do
-    URI::DEFAULT_PARSER = URI::RFC3986_PARSER
-    URI.parse(uri)
+    URI::RFC3986_PARSER.parse(uri)
   end
 
   x.report("RFC3986 parse(long uri)") do
-    URI::DEFAULT_PARSER = URI::RFC3986_PARSER
-    URI.parse(long_uri)
+    URI::RFC3986_PARSER.parse(long_uri)
   end
 
   x.compare!
