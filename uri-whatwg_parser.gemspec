@@ -29,5 +29,4 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "uri", ">= 1.0.0"
   spec.add_dependency "uri-idna"
-  spec.add_development_dependency "debug"
 end
