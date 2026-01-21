@@ -26,6 +26,11 @@ module URI
     NORMALIZED_WINDOWS_DRIVE_LETTER = Regexp.new("\\A([a-zA-Z][:])\\z")
     STARTS_WITH_WINDOWS_DRIVE_LETTER = Regexp.new("\\A([a-zA-Z][:|])(?:[/\\?#])?\\z")
 
+    VALID_SIGNS_FOR_SCHEME = ["+", "-", "."]
+    DELIMITER_SIGNS = ["/", "?", "#"]
+
+    WS_SCHEMES = %w[ws wss]
+
     def initialize
       reset
       @host_parser = HostParser.new
@@ -133,7 +138,7 @@ module URI
     end
 
     def scheme_state(c)
-      if ascii_alphanumerica?(c) || ["+", "-", "."].include?(c)
+      if ascii_alphanumerica?(c) || VALID_SIGNS_FOR_SCHEME.include?(c)
         @buffer << c.downcase
       elsif c == ":"
         if @state_override
@@ -294,7 +299,7 @@ module URI
         end
 
         @buffer.clear
-      elsif c.nil? || ["/", "?", "#"].include?(c) || (special_url? && c == "\\")
+      elsif c.nil? || DELIMITER_SIGNS.include?(c) || (special_url? && c == "\\")
         raise ParseError, "host is missing" if @at_sign_seen && @buffer.empty?
 
         @pos -= (@buffer.size + 1)
@@ -316,7 +321,7 @@ module URI
         @parse_result[:host] = @host_parser.parse(@buffer, !special_url?)
         @buffer.clear
         @state = :port_state
-      elsif c.nil? || ["/", "?", "#"].include?(c) || (special_url? && c == "\\")
+      elsif c.nil? || DELIMITER_SIGNS.include?(c) || (special_url? && c == "\\")
         @pos -= 1
         if special_url? && @buffer.empty?
           raise ParseError, "host is missing"
@@ -338,7 +343,7 @@ module URI
     def port_state(c)
       if ascii_digit?(c)
         @buffer << c
-      elsif c.nil? || ["/", "?", "#"].include?(c) || (special_url? && c == "\\") || @state_override
+      elsif c.nil? || DELIMITER_SIGNS.include?(c) || (special_url? && c == "\\") || @state_override
         unless @buffer.empty?
           port = Integer(@buffer, 10)
           raise ParseError, "port is invalid value" if port < 0 || port > 65535
@@ -410,7 +415,7 @@ module URI
     end
 
     def file_host_state(c)
-      if c.nil? || c == "/" || c == "\\" || c == "?" || c == "#"
+      if c.nil? || DELIMITER_SIGNS.include?(c) || (special_url? && c == "\\")
         @pos -= 1
 
         if !@state_override && windows_drive_letter?(@buffer)
@@ -502,7 +507,7 @@ module URI
     end
 
     def query_state(c)
-      if @encoding != Encoding::UTF_8 && (!special_url? || %w[ws wss].include?(@parse_result[:scheme]))
+      if @encoding != Encoding::UTF_8 && (!special_url? || WS_SCHEMES.include?(@parse_result[:scheme]))
         @encoding = Encoding::UTF_8
       end
 
