@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
+require "set"
+
 class URI::WhatwgParser
   module ParserHelper
-    C0_CONTROL_PERCENT_ENCODE_SET = (0..0x1f).map(&:chr)
-    ASCII_ALPHA = ("a".."z").to_a + ("A".."Z").to_a
-    ASCII_DIGIT = ("0".."9").to_a
+    C0_CONTROL_PERCENT_ENCODE_SET = Set.new((0..0x1f).map(&:chr))
+    ASCII_ALPHA = Set.new(("a".."z").to_a + ("A".."Z").to_a)
+    ASCII_DIGIT = Set.new(("0".."9").to_a)
 
     def ascii_alpha?(c)
       ASCII_ALPHA.include?(c)

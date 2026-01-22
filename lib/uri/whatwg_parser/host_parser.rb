@@ -7,8 +7,8 @@ class URI::WhatwgParser
   class HostParser
     include ParserHelper
 
-    FORBIDDEN_HOST_CODE_POINT = ["\x00", "\t", "\x0a", "\x0d", " ", "#", "/", ":", "<", ">", "?", "@", "[", "\\", "]", "^", "|"]
-    FORBIDDEN_DOMAIN_CODE_POINT = FORBIDDEN_HOST_CODE_POINT + C0_CONTROL_PERCENT_ENCODE_SET + ["%", "\x7f"]
+    FORBIDDEN_HOST_CODE_POINT = Set["\x00", "\t", "\x0a", "\x0d", " ", "#", "/", ":", "<", ">", "?", "@", "[", "\\", "]", "^", "|"]
+    FORBIDDEN_DOMAIN_CODE_POINT = FORBIDDEN_HOST_CODE_POINT | C0_CONTROL_PERCENT_ENCODE_SET | Set["%", "\x7f"]
 
     def parse(input, opaque = false) # :nodoc:
       return "" if input&.empty?

@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "set"
 require "uri"
 require_relative "whatwg_parser/error"
 require_relative "whatwg_parser/version"
@@ -13,23 +14,23 @@ module URI
 
     SPECIAL_SCHEME = { "ftp" => 21, "file" => nil, "http" => 80, "https" => 443, "ws" => 80, "wss" => 443 }
 
-    FRAGMENT_PERCENT_ENCODE_SET = C0_CONTROL_PERCENT_ENCODE_SET + [" ", "\"", "<", ">", "`"]
-    QUERY_PERCENT_ENCODE_SET = C0_CONTROL_PERCENT_ENCODE_SET + [" ", "\"", "#", "<", ">"]
-    SPECIAL_QUERY_PERCENT_ENCODE_SET = QUERY_PERCENT_ENCODE_SET + ["'"]
-    PATH_PERCENT_ENCODE_SET = QUERY_PERCENT_ENCODE_SET + ["?", "^", "`", "{", "}"]
-    USERINFO_PERCENT_ENCODE_SET = PATH_PERCENT_ENCODE_SET + ["/", ":", ";", "=","@", "[", "\\", "]", "|"]
+    FRAGMENT_PERCENT_ENCODE_SET = C0_CONTROL_PERCENT_ENCODE_SET | Set[" ", "\"", "<", ">", "`"]
+    QUERY_PERCENT_ENCODE_SET = C0_CONTROL_PERCENT_ENCODE_SET | Set[" ", "\"", "#", "<", ">"]
+    SPECIAL_QUERY_PERCENT_ENCODE_SET = QUERY_PERCENT_ENCODE_SET | Set["'"]
+    PATH_PERCENT_ENCODE_SET = QUERY_PERCENT_ENCODE_SET | Set["?", "^", "`", "{", "}"]
+    USERINFO_PERCENT_ENCODE_SET = PATH_PERCENT_ENCODE_SET | Set["/", ":", ";", "=", "@", "[", "\\", "]", "|"]
 
-    SINGLE_DOT_PATH_SEGMENTS = [".", "%2e", "%2E"]
-    DOUBLE_DOT_PATH_SEGMENTS = ["..", ".%2e", ".%2E", "%2e.", "%2e%2e", "%2e%2E", "%2E.", "%2E%2e", "%2E%2E"]
+    SINGLE_DOT_PATH_SEGMENTS = Set[".", "%2e", "%2E"]
+    DOUBLE_DOT_PATH_SEGMENTS = Set["..", ".%2e", ".%2E", "%2e.", "%2e%2e", "%2e%2E", "%2E.", "%2E%2e", "%2E%2E"]
 
     WINDOWS_DRIVE_LETTER = Regexp.new("\\A([a-zA-Z][:|])\\z")
     NORMALIZED_WINDOWS_DRIVE_LETTER = Regexp.new("\\A([a-zA-Z][:])\\z")
     STARTS_WITH_WINDOWS_DRIVE_LETTER = Regexp.new("\\A([a-zA-Z][:|])(?:[/\\?#])?\\z")
 
-    VALID_SIGNS_FOR_SCHEME = ["+", "-", "."]
-    DELIMITER_SIGNS = ["/", "?", "#"]
+    VALID_SIGNS_FOR_SCHEME = Set["+", "-", "."]
+    DELIMITER_SIGNS = Set["/", "?", "#"]
 
-    WS_SCHEMES = %w[ws wss]
+    WS_SCHEMES = Set["ws", "wss"]
 
     def initialize
       reset
