@@ -73,8 +73,7 @@ module URI
       @input = input.dup
 
       unless url
-        @input.sub!(/\A[\u0000-\u0020]*/, "")
-        @input.sub!(/[\u0000-\u0020]*\z/, "")
+        remove_c0_control_or_space!(@input)
       end
 
       @input.delete!("\t\n\r")
@@ -577,6 +576,17 @@ module URI
       else
         raise ArgumentError,
           "bad argument (expected URI object or URI string)"
+      end
+    end
+
+    if RUBY_VERSION >= "4.0"
+      def remove_c0_control_or_space!(str)
+        str.strip!("\u0000-\u0020")
+      end
+    else
+      def remove_c0_control_or_space!(str)
+        str.sub!(/\A[\u0000-\u0020]*/, "")
+        str.sub!(/[\u0000-\u0020]*\z/, "")
       end
     end
   end
