@@ -167,7 +167,7 @@ module URI
           @state = :special_relative_or_authority_state
         elsif special_url?
           @state = :special_authority_slashes_state
-        elsif rest.start_with?("/")
+        elsif @input.byteslice(@pos + 1) == "/"
           @state = :path_or_authority_state
           @pos += 1
         else
@@ -202,7 +202,7 @@ module URI
     end
 
     def special_relative_or_authority_state(c)
-      if c == "/" && rest.start_with?("/")
+      if c == "/" && @input.byteslice(@pos + 1) == "/"
         @state = :special_authority_ignore_slashes_state
         @pos -= 1
       else
@@ -263,7 +263,7 @@ module URI
     end
 
     def special_authority_slashes_state(c)
-      if c == "/" && rest.start_with?("/")
+      if c == "/" && @input.byteslice(@pos + 1) == "/"
         @state = :special_authority_ignore_slashes_state
         @pos += 1
       else
@@ -496,7 +496,8 @@ module URI
         @parse_result[:fragment] = nil
         @state = :fragment_state
       elsif c == " "
-        if rest.start_with?("?", "#")
+        first_of_rest = @input.byteslice(@pos + 1)
+        if first_of_rest == "?" || first_of_rest == "#"
           @parse_result[:opaque] += "%20"
         else
           @parse_result[:opaque] += " "
