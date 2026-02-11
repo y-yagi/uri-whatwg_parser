@@ -10,6 +10,7 @@ class URI::WhatwgParser::TestParserTest < Test::Unit::TestCase
     assert_equal '%E3%81%82', parser.utf8_percent_encode('あ', [])
     assert_equal "%E2%89%A1", parser.utf8_percent_encode("≡", URI::WhatwgParser::USERINFO_PERCENT_ENCODE_SET)
     assert_equal "%E2%80%BD", parser.utf8_percent_encode("‽", URI::WhatwgParser::USERINFO_PERCENT_ENCODE_SET)
+    assert_equal "~", parser.utf8_percent_encode("~", URI::WhatwgParser::C0_CONTROL_PERCENT_ENCODE_SET)
   end
 
   def test_utf8_percent_encode_string
