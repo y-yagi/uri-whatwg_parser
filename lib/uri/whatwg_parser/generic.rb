@@ -62,7 +62,7 @@ module URI
         if host.nil? || host.empty? || scheme == "file"
           raise InvalidURIError, "cannot set user when host is nil or file schme"
         end
-        set_user(URI::DEFAULT_PARSER.encode_userinfo(v))
+        set_user(URI::DEFAULT_PARSER.utf8_percent_encode_string(v, URI::WhatwgParser::USERINFO_PERCENT_ENCODE_SET))
       end
 
       def password=(v)
@@ -72,7 +72,7 @@ module URI
         if host.nil? || host.empty? || scheme == "file"
           raise InvalidURIError, "cannot set password when host is nil or file schme"
         end
-        set_password(URI::DEFAULT_PARSER.encode_userinfo(v))
+        set_password(URI::DEFAULT_PARSER.utf8_percent_encode_string(v, URI::WhatwgParser::USERINFO_PERCENT_ENCODE_SET))
       end
 
       def host=(v)
