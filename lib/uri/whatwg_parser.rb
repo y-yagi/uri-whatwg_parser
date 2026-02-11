@@ -41,15 +41,15 @@ module URI
       {}
     end
 
-    def parse(input, base: nil, encoding: Encoding::UTF_8, url: nil, state_override: nil) # :nodoc:
-      URI.for(*self.split(input, base: base, encoding: encoding, url: url, state_override: state_override))
+    def parse(input, base: nil, url: nil, state_override: nil) # :nodoc:
+      URI.for(*self.split(input, base: base, url: url, state_override: state_override))
     end
 
-    def split(input, base: nil, encoding: Encoding::UTF_8, url: nil, state_override: nil) # :nodoc:
+    def split(input, base: nil, url: nil, state_override: nil) # :nodoc:
       reset
       @base = nil
       if base != nil
-        ary = split(base, base: nil, encoding: encoding)
+        ary = split(base, base: nil)
         @base = { scheme: ary[0], userinfo: ary[1], host: ary[2], port: ary[3], registry: ary[4], path: ary[5], opaque: ary[6], query: ary[7], fragment: ary[8]}
         @base_paths = @paths
         reset
@@ -69,7 +69,6 @@ module URI
         raise ParseError, "uri can't be empty" if (input.nil? || input.empty?) && @base.nil?
       end
 
-      @encoding = encoding
       @input = input.dup
 
       unless url
@@ -106,7 +105,7 @@ module URI
 
     def encode_userinfo(str)
       str.each_char.with_object(+"") do |char, encoded|
-        encoded << percent_encode(char, USERINFO_PERCENT_ENCODE_SET)
+        encoded << utf8_percent_encode(char, USERINFO_PERCENT_ENCODE_SET)
       end
     end
 
@@ -289,7 +288,7 @@ module URI
             next
           end
 
-          encoded_char = percent_encode(char, USERINFO_PERCENT_ENCODE_SET, @encoding)
+          encoded_char = utf8_percent_encode(char, USERINFO_PERCENT_ENCODE_SET)
 
           if @password_token_seen
             @password = @password.to_s + encoded_char
@@ -484,7 +483,7 @@ module URI
           @state = :fragment_state
         end
       else
-        @buffer << percent_encode(c, PATH_PERCENT_ENCODE_SET, @encoding)
+        @buffer << utf8_percent_encode(c, PATH_PERCENT_ENCODE_SET)
       end
     end
 
@@ -503,20 +502,16 @@ module URI
           @parse_result[:opaque] += " "
         end
       elsif !c.nil?
-        @parse_result[:opaque] += percent_encode(c, C0_CONTROL_PERCENT_ENCODE_SET, @encoding)
+        @parse_result[:opaque] += utf8_percent_encode(c, C0_CONTROL_PERCENT_ENCODE_SET)
       end
     end
 
     def query_state(c)
-      if @encoding != Encoding::UTF_8 && (!special_url? || WS_SCHEMES.include?(@parse_result[:scheme]))
-        @encoding = Encoding::UTF_8
-      end
-
       if c.nil? || (!@state_override && c == "#")
         query_percent_encode_set = special_url? ? SPECIAL_QUERY_PERCENT_ENCODE_SET : QUERY_PERCENT_ENCODE_SET
         encoded_query = +""
         @buffer.each_char do |char|
-          encoded_query << percent_encode(char, query_percent_encode_set, @encoding)
+          encoded_query << utf8_percent_encode(char, query_percent_encode_set)
         end
         @parse_result[:query] = encoded_query
         @buffer.clear
@@ -528,7 +523,7 @@ module URI
 
     def fragment_state(c)
       return if c.nil?
-      @parse_result[:fragment] = @parse_result[:fragment].to_s + percent_encode(c, FRAGMENT_PERCENT_ENCODE_SET, @encoding)
+      @parse_result[:fragment] = @parse_result[:fragment].to_s + utf8_percent_encode(c, FRAGMENT_PERCENT_ENCODE_SET)
     end
 
     def windows_drive_letter?(str)

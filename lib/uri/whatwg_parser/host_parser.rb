@@ -191,7 +191,7 @@ class URI::WhatwgParser
 
     def parse_opaque_host(host)
       raise ParseError if include_forbidden_host_code_point?(host)
-      host.chars.map { |c| percent_encode(c, C0_CONTROL_PERCENT_ENCODE_SET) }.join
+      host.chars.map { |c| utf8_percent_encode(c, C0_CONTROL_PERCENT_ENCODE_SET) }.join
     end
 
     def percent_decode(str)
