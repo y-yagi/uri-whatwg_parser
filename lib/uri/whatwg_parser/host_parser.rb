@@ -208,15 +208,14 @@ class URI::WhatwgParser
       end
 
       last = parts.last
-      return true if last != "" && last.chars.all? { |c| ascii_digit?(c) }
+      return true if last != "" && last.match?(/\A\d+\z/)
 
-      begin
-        parse_ipv4_number(last)
-      rescue ParseError
-        return false
+      if last&.start_with?("0x", "0X")
+        hex = last[2..-1] || ""
+        return true if hex.empty? || hex.match?(/\A[0-9A-Fa-f]+\z/)
       end
 
-      true
+      false
     end
 
     def parse_ipv4_number(str)
