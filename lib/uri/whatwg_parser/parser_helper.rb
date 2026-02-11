@@ -28,5 +28,9 @@ class URI::WhatwgParser
 
       c.bytes.map { |b| "%%%02X" % b }.join
     end
+
+    def utf8_percent_encode_string(str, encode_set)
+      str.chars.map { |c| utf8_percent_encode(c, encode_set) }.join
+    end
   end
 end

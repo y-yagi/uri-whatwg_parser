@@ -103,12 +103,6 @@ module URI
       uri
     end
 
-    def encode_userinfo(str)
-      str.each_char.with_object(+"") do |char, encoded|
-        encoded << utf8_percent_encode(char, USERINFO_PERCENT_ENCODE_SET)
-      end
-    end
-
     private
 
     def reset
@@ -509,11 +503,8 @@ module URI
     def query_state(c)
       if c.nil? || (!@state_override && c == "#")
         query_percent_encode_set = special_url? ? SPECIAL_QUERY_PERCENT_ENCODE_SET : QUERY_PERCENT_ENCODE_SET
-        encoded_query = +""
-        @buffer.each_char do |char|
-          encoded_query << utf8_percent_encode(char, query_percent_encode_set)
-        end
-        @parse_result[:query] = encoded_query
+        # TODO: We need to consider encoding here.
+        @parse_result[:query] = utf8_percent_encode_string(@buffer, query_percent_encode_set)
         @buffer.clear
         @state = :fragment_state if c == "#"
       elsif !c.nil?
