@@ -9,6 +9,8 @@ class URI::WhatwgParser
 
     FORBIDDEN_HOST_CODE_POINT = Set["\x00", "\t", "\x0a", "\x0d", " ", "#", "/", ":", "<", ">", "?", "@", "[", "\\", "]", "^", "|"]
     FORBIDDEN_DOMAIN_CODE_POINT = FORBIDDEN_HOST_CODE_POINT | C0_CONTROL_PERCENT_ENCODE_SET | Set["%", "\x7f"]
+    FORBIDDEN_HOST_REGEX = Regexp.union(FORBIDDEN_HOST_CODE_POINT.to_a)
+    FORBIDDEN_DOMAIN_REGEX = Regexp.union(FORBIDDEN_DOMAIN_CODE_POINT.to_a)
 
     def parse(input, opaque = false) # :nodoc:
       return "" if input&.empty?
@@ -254,11 +256,11 @@ class URI::WhatwgParser
     end
 
     def include_forbidden_domain_code_point?(str)
-      FORBIDDEN_DOMAIN_CODE_POINT.any? {|c| str.include?(c) }
+      str.match?(FORBIDDEN_DOMAIN_REGEX)
     end
 
     def include_forbidden_host_code_point?(str)
-      FORBIDDEN_HOST_CODE_POINT.any? {|c| str.include?(c) }
+      str.match?(FORBIDDEN_HOST_REGEX)
     end
   end
 end
