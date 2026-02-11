@@ -116,6 +116,7 @@ module URI
       @parse_result = { scheme: nil, userinfo: nil, host: nil, port: nil, registry: nil, path: nil, opaque: nil, query: nil, fragment: nil }
       @state_override = nil
       @state = :scheme_start_state
+      @special_url = nil
     end
 
     def scheme_start_state(c)
@@ -144,6 +145,7 @@ module URI
         end
 
         @parse_result[:scheme] = @buffer
+        @special_url = special_url?(@buffer)
 
         if @state_override
           if SPECIAL_SCHEME.value?(@parse_result[:port].to_i)
@@ -181,6 +183,7 @@ module URI
 
       if !@base[:opaque].nil? && c == "#"
         @parse_result[:scheme] = @base[:scheme]
+        @special_url = special_url?(@base[:scheme])
         @paths = @base_paths
         @parse_result[:query] = @base[:query]
         @parse_result[:fragment] = nil
@@ -215,6 +218,7 @@ module URI
 
     def relative_state(c)
       @parse_result[:scheme] = @base[:scheme]
+      @special_url = special_url?(@base[:scheme])
       if c == "/"
         @state = :relative_slash_state
       elsif special_url? && c == "\\"
@@ -360,6 +364,7 @@ module URI
 
     def file_state(c)
       @parse_result[:scheme] = "file"
+      @special_url = true
       @parse_result[:host] = nil
 
       if c == "/" || c == "\\"
@@ -529,8 +534,12 @@ module URI
       NORMALIZED_WINDOWS_DRIVE_LETTER.match?(str)
     end
 
-    def special_url?(str = @parse_result[:scheme])
-      SPECIAL_SCHEME.key?(str)
+    def special_url?(str = nil)
+      if str
+        SPECIAL_SCHEME.key?(str)
+      else
+        @special_url.nil? ? SPECIAL_SCHEME.key?(@parse_result[:scheme]) : @special_url
+      end
     end
 
     def single_dot_path_segments?(c)
