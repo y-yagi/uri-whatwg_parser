@@ -8,6 +8,8 @@ class URI::WhatwgParser::TestParserTest < Test::Unit::TestCase
     assert_equal 'A', parser.percent_encode('A', [])
     assert_equal '%0A', parser.percent_encode("\n", ["\n"])
     assert_equal '%E3%81%82', parser.percent_encode('あ', [])
+    assert_equal "%E2%89%A1", parser.percent_encode("≡", URI::WhatwgParser::USERINFO_PERCENT_ENCODE_SET)
+    assert_equal "%E2%80%BD", parser.percent_encode("‽", URI::WhatwgParser::USERINFO_PERCENT_ENCODE_SET)
     sjis_encoded = parser.percent_encode('あ', [], Encoding::Shift_JIS)
     assert_equal '%82%A0', sjis_encoded
   end
