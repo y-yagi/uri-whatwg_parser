@@ -6,19 +6,9 @@ class URI::WhatwgParser
   module ParserHelper
     # NOTE: This set isn't accurate, but it's OK now because greater than `0x7e` is checked inside a method.
     C0_CONTROL_PERCENT_ENCODE_SET = Set.new((0..0x1f).map(&:chr))
-    ASCII_ALPHA = Set.new(("a".."z").to_a + ("A".."Z").to_a)
-    ASCII_DIGIT = Set.new(("0".."9").to_a)
-
-    def ascii_alpha?(c)
-      ASCII_ALPHA.include?(c)
-    end
 
     def ascii_alphanumerica?(c)
       ascii_alpha?(c) || ascii_digit?(c)
-    end
-
-    def ascii_digit?(c)
-      ASCII_DIGIT.include?(c)
     end
 
     def utf8_percent_encode(c, encode_set)

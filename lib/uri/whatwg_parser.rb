@@ -32,6 +32,10 @@ module URI
 
     WS_SCHEMES = Set["ws", "wss"]
 
+    ASCII_ALPHA_LOWERCASE = Set.new(("a".."z").to_a)
+    ASCII_ALPHA_UPPERCASE = Set.new(("A".."Z").to_a)
+    ASCII_DIGIT = Set.new(("0".."9").to_a)
+
     def initialize
       reset
       @host_parser = HostParser.new
@@ -120,7 +124,10 @@ module URI
     end
 
     def scheme_start_state(c)
-      if ascii_alpha?(c)
+      if ASCII_ALPHA_LOWERCASE.include?(c)
+        @buffer << c
+        @state = :scheme_state
+      elsif ASCII_ALPHA_UPPERCASE.include?(c)
         @buffer << c.downcase
         @state = :scheme_state
       elsif @state_override.nil?
@@ -132,7 +139,9 @@ module URI
     end
 
     def scheme_state(c)
-      if ascii_alphanumerica?(c) || VALID_SIGNS_FOR_SCHEME.include?(c)
+      if ASCII_ALPHA_LOWERCASE.include?(c) || ASCII_DIGIT.include?(c) || VALID_SIGNS_FOR_SCHEME.include?(c)
+        @buffer << c
+      elsif ASCII_ALPHA_UPPERCASE.include?(c)
         @buffer << c.downcase
       elsif c == ":"
         if @state_override
@@ -338,7 +347,7 @@ module URI
     end
 
     def port_state(c)
-      if ascii_digit?(c)
+      if ASCII_DIGIT.include?(c)
         @buffer << c
       elsif c.nil? || DELIMITER_SIGNS.include?(c) || (special_url? && c == "\\") || @state_override
         unless @buffer.empty?
