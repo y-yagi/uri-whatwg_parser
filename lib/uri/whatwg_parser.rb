@@ -62,7 +62,9 @@ module URI
       if url
         raise ArgumentError, "bad argument (expected URI object)" unless url.is_a?(URI::Generic)
         @parse_result.merge!(url.component.zip(url.send(:component_ary)).to_h)
-        @parse_result[:path] = nil
+        @username = url.user
+        @password = url.password
+        @parse_result.delete(:userinfo)
       end
 
       if state_override
@@ -90,9 +92,9 @@ module URI
         @pos += 1
       end
 
-      @parse_result[:userinfo] = [@username, @password].compact.reject(&:empty?).join(":")
-      @parse_result[:path] = "/#{@paths.join("/")}" if @paths && !@paths.empty?
-      @parse_result.values
+      userinfo = [@username, @password].compact.reject(&:empty?).join(":")
+      path = "/#{@paths.join("/")}" if @paths && !@paths.empty?
+      [@parse_result[:scheme], userinfo, @parse_result[:host], @parse_result[:port], @parse_result[:registry], path, @parse_result[:opaque], @parse_result[:query], @parse_result[:fragment]]
     end
 
     def join(*uris)
@@ -117,7 +119,7 @@ module URI
       @paths = nil
       @username = nil
       @password = nil
-      @parse_result = { scheme: nil, userinfo: nil, host: nil, port: nil, registry: nil, path: nil, opaque: nil, query: nil, fragment: nil }
+      @parse_result = { scheme: nil, host: nil, port: nil, registry: nil, path: nil, opaque: nil, query: nil, fragment: nil }
       @state_override = nil
       @state = :scheme_start_state
       @special_url = nil
@@ -566,7 +568,7 @@ module URI
     end
 
     def includes_credentials?
-      !@parse_result[:userinfo].nil? || (@username && !@username.empty?) || (@password && !@password.empty?)
+      (@username && !@username.empty?) || (@password && !@password.empty?)
     end
 
     def rest
