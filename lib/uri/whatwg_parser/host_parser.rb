@@ -203,16 +203,25 @@ class URI::WhatwgParser
     end
 
     def ends_in_number?(domain)
-      parts = domain.split(".", -1)
-      if parts.last == ""
-        return false if parts.size == 1
-        parts.pop
+      return false if domain.empty?
+
+      if domain.end_with?(".")
+        # Remove trailing dot and find the actual last segment
+        domain_without_trailing = domain[0...-1]
+        return false if domain_without_trailing.empty?
+
+        last_dot = domain_without_trailing.rindex(".")
+        last = last_dot ? domain_without_trailing[last_dot + 1..-1] : domain_without_trailing
+      else
+        # Find the last segment after the last dot
+        last_dot = domain.rindex(".")
+        last = last_dot ? domain[last_dot + 1..-1] : domain
       end
 
-      last = parts.last
-      return true if last != "" && last.match?(/\A\d+\z/)
+      return false if last.empty?
+      return true if last.match?(/\A\d+\z/)
 
-      if last&.start_with?("0x", "0X")
+      if last.start_with?("0x", "0X")
         hex = last[2..-1] || ""
         return true if hex.empty? || hex.match?(/\A[0-9A-Fa-f]+\z/)
       end
@@ -247,6 +256,14 @@ class URI::WhatwgParser
     end
 
     def domain_to_ascii(domain)
+      # If domain is already ASCII-only, lowercase, and doesn't contain punycode prefix
+      # we can skip IDNA processing
+      if domain.ascii_only? && domain == domain.downcase && !domain.include?("xn--")
+        raise ParseError, "including invalid value in host" if include_forbidden_domain_code_point?(domain)
+        raise ParseError, "host can't be empty" if domain.empty?
+        return domain
+      end
+
       ascii_domain = URI::IDNA.whatwg_to_ascii(domain.force_encoding(Encoding::UTF_8), be_strict: false)
 
       raise ParseError, "including invalid value in host" if include_forbidden_domain_code_point?(ascii_domain)
