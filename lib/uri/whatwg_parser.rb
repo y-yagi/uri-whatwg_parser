@@ -87,9 +87,8 @@ module URI
       @pos = 0
 
       while @pos <= @input_chars.length
-        c = @input_chars[@pos]
-        ret = send(@state, c)
-        break if ret == :terminate
+        send(@state, @input_chars[@pos])
+        break if @terminate
         @pos += 1
       end
 
@@ -124,6 +123,7 @@ module URI
       @state_override = nil
       @state = :scheme_start_state
       @special_url = nil
+      @terminate = nil
     end
 
     def scheme_start_state(c)
@@ -152,7 +152,8 @@ module URI
             (!special_url? && special_url?(@buffer)) ||
             ((includes_credentials? || !@parse_result[:port].nil?) && @buffer == "file") ||
             (@parse_result[:scheme] == "file" && @parse_result[:host]&.empty?)
-            return :terminate
+            @terminate = true
+            return
           end
         end
 
@@ -163,7 +164,8 @@ module URI
           if SPECIAL_SCHEME.value?(@parse_result[:port].to_i)
             @parse_result[:port] = nil
           end
-          return :terminate
+          @terminate = true
+          return
         end
 
         @buffer = +""
@@ -340,7 +342,10 @@ module URI
           @parse_result[:host] = @host_parser.parse(@buffer, !special_url?)
           @buffer.clear
           @state = :path_start_state
-          return :terminate if @state_override
+          if @state_override
+            @terminate = true
+            return
+          end
         end
       else
         @inside_brackets = true if c == "["
@@ -363,7 +368,10 @@ module URI
           end
 
           @buffer.clear
-          return :terminate if @state_override
+          if @state_override
+            @terminate = true
+            return
+          end
         end
 
         raise ParseError, "port is invalid value" if @state_override
@@ -432,13 +440,19 @@ module URI
           @state = :path_state
         elsif @buffer.empty?
           @parse_result[:host] = nil
-          return :terminate if @state_override
+          if @state_override
+            @terminate = true
+            return
+          end
           @state = :path_start_state
         else
           host = @host_parser.parse(@buffer, !special_url?)
           host = "" if host == "localhost"
           @parse_result[:host] = host
-          return :terminate if @state_override
+          if @state_override
+            @terminate = true
+            return
+          end
           @buffer.clear
           @state = :path_start_state
         end
