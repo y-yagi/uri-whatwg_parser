@@ -84,9 +84,10 @@ module URI
       input.delete!("\t\n\r") if /[\t\n\r]/.match?(input)
 
       @input_chars = input.chars
+      input_chars_length = @input_chars.length
       @pos = 0
 
-      while @pos <= @input_chars.length
+      while @pos <= input_chars_length
         send(@state, @input_chars[@pos])
         break if @terminate
         @pos += 1
