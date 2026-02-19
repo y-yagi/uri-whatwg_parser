@@ -81,7 +81,7 @@ module URI
         remove_c0_control_or_space!(@input)
       end
 
-      @input.delete!("\t\n\r")
+      @input.delete!("\t\n\r") if /[\t\n\r]/.match?(@input)
 
       @pos = 0
 
