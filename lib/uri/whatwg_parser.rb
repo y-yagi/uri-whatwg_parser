@@ -75,18 +75,19 @@ module URI
         raise ParseError, "uri can't be empty" if (input.nil? || input.empty?) && @base.nil?
       end
 
-      @input = input.dup
+      input = input.dup
 
       unless url
-        remove_c0_control_or_space!(@input)
+        remove_c0_control_or_space!(input)
       end
 
-      @input.delete!("\t\n\r") if /[\t\n\r]/.match?(@input)
+      input.delete!("\t\n\r") if /[\t\n\r]/.match?(input)
 
+      @input_chars = input.chars
       @pos = 0
 
-      while @pos <= @input.length
-        c = @input[@pos]
+      while @pos <= @input_chars.length
+        c = @input_chars[@pos]
         ret = send(@state, c)
         break if ret == :terminate
         @pos += 1
@@ -173,7 +174,7 @@ module URI
           @state = :special_relative_or_authority_state
         elsif special_url?
           @state = :special_authority_slashes_state
-        elsif @input.byteslice(@pos + 1) == "/"
+        elsif @input_chars[@pos + 1] == "/"
           @state = :path_or_authority_state
           @pos += 1
         else
@@ -209,7 +210,7 @@ module URI
     end
 
     def special_relative_or_authority_state(c)
-      if c == "/" && @input.byteslice(@pos + 1) == "/"
+      if c == "/" && @input_chars[@pos + 1] == "/"
         @state = :special_authority_ignore_slashes_state
         @pos -= 1
       else
@@ -271,7 +272,7 @@ module URI
     end
 
     def special_authority_slashes_state(c)
-      if c == "/" && @input.byteslice(@pos + 1) == "/"
+      if c == "/" && @input_chars[@pos + 1] == "/"
         @state = :special_authority_ignore_slashes_state
         @pos += 1
       else
@@ -505,7 +506,7 @@ module URI
         @parse_result[:fragment] = nil
         @state = :fragment_state
       elsif c == " "
-        first_of_rest = @input.byteslice(@pos + 1)
+        first_of_rest = @input_chars[@pos + 1]
         if first_of_rest == "?" || first_of_rest == "#"
           @parse_result[:opaque] += "%20"
         else
@@ -572,7 +573,7 @@ module URI
     end
 
     def rest
-      @input[@pos+1..]
+      @input_chars[@pos + 1..]&.join
     end
 
     def convert_to_uri(uri)
