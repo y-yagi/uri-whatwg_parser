@@ -588,12 +588,16 @@ module URI
 
     if RUBY_VERSION >= "4.0"
       def remove_c0_control_or_space!(str)
-        str.strip!("\u0000-\u0020")
+        if /[\u0000-\u0020]/.match?(str)
+          str.strip!("\u0000-\u0020")
+        end
       end
     else
       def remove_c0_control_or_space!(str)
-        str.sub!(/\A[\u0000-\u0020]*/, "")
-        str.sub!(/[\u0000-\u0020]*\z/, "")
+        if /[\u0000-\u0020]/.match?(str)
+          str.sub!(/\A[\u0000-\u0020]*/, "")
+          str.sub!(/[\u0000-\u0020]*\z/, "")
+        end
       end
     end
   end
