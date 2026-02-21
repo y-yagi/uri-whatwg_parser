@@ -41,8 +41,7 @@ class URI::WhatwgParser
       raise URI::WhatwgParser::ParseError, "invalid IPv4 format" if parts.size > 4
       numbers = []
       parts.each do |part|
-        value, _validation_error = parse_ipv4_number(part)
-        numbers << value
+        numbers << parse_ipv4_number(part)
       end
 
       (numbers.size-1).times {|i| raise URI::WhatwgParser::ParseError, "invalid IPv4 format" if numbers[i] > 255 }
@@ -232,24 +231,20 @@ class URI::WhatwgParser
     def parse_ipv4_number(str)
       raise ParseError, "invalid IPv4 format" if str&.empty?
 
-      validation_error = false
       r = 10
 
       if str.size >= 2 && str.start_with?("0x", "0X")
-        validation_error  = true
         str = str[2..-1]
         r = 16
       elsif str.size >= 2 && str.start_with?("0")
-        validation_error  = true
         str = str[1..-1]
         r = 8
       end
 
-      return 0, true if str.empty?
+      return 0 if str.empty?
 
       begin
-        output = Integer(str, r)
-        return output, validation_error
+        Integer(str, r)
       rescue ArgumentError
         raise ParseError, "invalid IPv4 format"
       end
