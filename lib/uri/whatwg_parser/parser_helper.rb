@@ -16,8 +16,21 @@ class URI::WhatwgParser
       c.bytes.map { |b| "%%%02X" % b }.join
     end
 
+    ENCODE_REGEXES = {}
+    private_constant :ENCODE_REGEXES
+
     def utf8_percent_encode_string(str, encode_set)
-      str.chars.map { |c| utf8_percent_encode(c, encode_set) }.join
+      regex = ENCODE_REGEXES[encode_set.object_id] ||= build_encode_regex(encode_set)
+      str.gsub(regex) { |c|
+        c.bytesize == 1 ? "%%%02X" % c.ord : c.bytes.map { |b| "%%%02X" % b }.join
+      }
+    end
+
+    private
+
+    def build_encode_regex(encode_set)
+      chars = encode_set.map { |c| Regexp.escape(c) }.join
+      Regexp.new("[#{chars}]|[^\x00-\x7e]")
     end
   end
 end
