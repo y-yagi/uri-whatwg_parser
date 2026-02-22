@@ -65,6 +65,7 @@ module URI
         @username = url.user
         @password = url.password
         @parse_result.delete(:userinfo)
+        @special_url = special_url?(@parse_result[:scheme])
       end
 
       if state_override
@@ -286,7 +287,7 @@ module URI
     end
 
     def relative_slash_state(c)
-      if special_url? && (c == "/" || c == "\\")
+      if @special_url && (c == "/" || c == "\\")
         @state = :special_authority_ignore_slashes_state
       elsif c == "/"
         @state = :authority_state
@@ -336,7 +337,7 @@ module URI
         end
 
         @buffer.clear
-      elsif c.nil? || DELIMITER_SIGNS.include?(c) || (special_url? && c == "\\")
+      elsif c.nil? || DELIMITER_SIGNS.include?(c) || (@special_url && c == "\\")
         raise ParseError, "host is missing" if @at_sign_seen && @buffer.empty?
 
         @pos -= (@buffer.size + 1)
@@ -355,17 +356,17 @@ module URI
         raise ParseError, "host is missing" if @buffer.empty?
         raise ParseError, "invalid host" if @state_override && @state_override == :hostname_state
 
-        @parse_result[:host] = @host_parser.parse(@buffer, !special_url?)
+        @parse_result[:host] = @host_parser.parse(@buffer, !@special_url)
         @buffer.clear
         @state = :port_state
-      elsif c.nil? || DELIMITER_SIGNS.include?(c) || (special_url? && c == "\\")
+      elsif c.nil? || DELIMITER_SIGNS.include?(c) || (@special_url && c == "\\")
         @pos -= 1
-        if special_url? && @buffer.empty?
+        if @special_url && @buffer.empty?
           raise ParseError, "host is missing"
         elsif @state_override && @buffer.empty? && (includes_credentials? || !@parse_result[:port].nil?)
           raise ParseError, "invalid host"
         else
-          @parse_result[:host] = @host_parser.parse(@buffer, !special_url?)
+          @parse_result[:host] = @host_parser.parse(@buffer, !@special_url)
           @buffer.clear
           @state = :path_start_state
           if @state_override
@@ -383,7 +384,7 @@ module URI
     def port_state(c)
       if ASCII_DIGIT.include?(c)
         @buffer << c
-      elsif c.nil? || DELIMITER_SIGNS.include?(c) || (special_url? && c == "\\") || @state_override
+      elsif c.nil? || DELIMITER_SIGNS.include?(c) || (@special_url && c == "\\") || @state_override
         unless @buffer.empty?
           port = Integer(@buffer, 10)
           raise ParseError, "port is invalid value" if port < 0 || port > 65535
@@ -459,7 +460,7 @@ module URI
     end
 
     def file_host_state(c)
-      if c.nil? || DELIMITER_SIGNS.include?(c) || (special_url? && c == "\\")
+      if c.nil? || DELIMITER_SIGNS.include?(c) || (@special_url && c == "\\")
         @pos -= 1
 
         if !@state_override && windows_drive_letter?(@buffer)
@@ -472,7 +473,7 @@ module URI
           end
           @state = :path_start_state
         else
-          host = @host_parser.parse(@buffer, !special_url?)
+          host = @host_parser.parse(@buffer, !@special_url)
           host = "" if host == "localhost"
           @parse_result[:host] = host
           if @state_override
@@ -488,7 +489,7 @@ module URI
     end
 
     def path_start_state(c)
-      if special_url?
+      if @special_url
         @pos -= 1 if c != "/" && c != "\\"
         @state = :path_state
       elsif !@state_override && c == "?"
@@ -507,14 +508,14 @@ module URI
     def path_state(c)
       @paths ||= []
 
-      if (c.nil? || c == "/") || (special_url? && c == "\\") || (!@state_override && (c == "?" || c == "#"))
+      if (c.nil? || c == "/") || (@special_url && c == "\\") || (!@state_override && (c == "?" || c == "#"))
         if double_dot_path_segments?(@buffer)
           shorten_url_path
 
-          if c != "/" && !(special_url? && c == "\\")
+          if c != "/" && !(@special_url && c == "\\")
             @paths << ""
           end
-        elsif single_dot_path_segments?(@buffer) && c != "/" && !((special_url? && c == "\\"))
+        elsif single_dot_path_segments?(@buffer) && c != "/" && !((@special_url && c == "\\"))
           @paths << ""
         elsif !single_dot_path_segments?(@buffer)
           if @parse_result[:scheme] == "file" && @paths.empty? && windows_drive_letter?(@buffer)
@@ -559,7 +560,7 @@ module URI
 
     def query_state(c)
       if c.nil? || (!@state_override && c == "#")
-        query_percent_encode_set = special_url? ? SPECIAL_QUERY_PERCENT_ENCODE_SET : QUERY_PERCENT_ENCODE_SET
+        query_percent_encode_set = @special_url ? SPECIAL_QUERY_PERCENT_ENCODE_SET : QUERY_PERCENT_ENCODE_SET
         # TODO: We need to consider encoding here.
         @parse_result[:query] = utf8_percent_encode_string(@buffer, query_percent_encode_set)
         @buffer.clear
@@ -586,12 +587,8 @@ module URI
       NORMALIZED_WINDOWS_DRIVE_LETTER.match?(str)
     end
 
-    def special_url?(str = nil)
-      if str
-        SPECIAL_SCHEME.key?(str)
-      else
-        @special_url.nil? ? SPECIAL_SCHEME.key?(@parse_result[:scheme]) : @special_url
-      end
+    def special_url?(str = @parse_result[:scheme])
+      SPECIAL_SCHEME.key?(str)
     end
 
     def single_dot_path_segments?(c)
