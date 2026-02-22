@@ -181,7 +181,7 @@ module URI
           @state = :path_or_authority_state
           @pos += 1
         else
-          @parse_result[:opaque] = ""
+          @parse_result[:opaque] = +""
           @state = :opaque_path_state
         end
       elsif @state_override.nil?
@@ -304,9 +304,9 @@ module URI
           encoded_char = utf8_percent_encode(char, USERINFO_PERCENT_ENCODE_SET)
 
           if @password_token_seen
-            @password = @password.to_s + encoded_char
+            (@password ||= +"") << encoded_char
           else
-            @username = @username.to_s + encoded_char
+            (@username ||= +"") << encoded_char
           end
         end
 
@@ -523,12 +523,12 @@ module URI
       elsif c == " "
         first_of_rest = @input_chars[@pos + 1]
         if first_of_rest == "?" || first_of_rest == "#"
-          @parse_result[:opaque] += "%20"
+          @parse_result[:opaque] << "%20"
         else
-          @parse_result[:opaque] += " "
+          @parse_result[:opaque] << " "
         end
       elsif !c.nil?
-        @parse_result[:opaque] += utf8_percent_encode(c, C0_CONTROL_PERCENT_ENCODE_SET)
+        @parse_result[:opaque] << utf8_percent_encode(c, C0_CONTROL_PERCENT_ENCODE_SET)
       end
     end
 
@@ -546,7 +546,7 @@ module URI
 
     def fragment_state(c)
       return if c.nil?
-      @parse_result[:fragment] = @parse_result[:fragment].to_s + utf8_percent_encode(c, FRAGMENT_PERCENT_ENCODE_SET)
+      (@parse_result[:fragment] ||= +"") << utf8_percent_encode(c, FRAGMENT_PERCENT_ENCODE_SET)
     end
 
     def windows_drive_letter?(str)
