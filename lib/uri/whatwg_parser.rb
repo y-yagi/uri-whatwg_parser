@@ -88,7 +88,7 @@ module URI
       @pos = 0
 
       while @pos <= input_chars_length
-        send(@state, @input_chars[@pos])
+        dispatch_state(@input_chars[@pos])
         break if @terminate
         @pos += 1
       end
@@ -111,6 +111,31 @@ module URI
     end
 
     private
+
+    def dispatch_state(c)
+      case @state
+      when :scheme_start_state                     then scheme_start_state(c)
+      when :scheme_state                           then scheme_state(c)
+      when :no_scheme_state                        then no_scheme_state(c)
+      when :special_relative_or_authority_state    then special_relative_or_authority_state(c)
+      when :path_or_authority_state                then path_or_authority_state(c)
+      when :relative_state                         then relative_state(c)
+      when :relative_slash_state                   then relative_slash_state(c)
+      when :special_authority_slashes_state        then special_authority_slashes_state(c)
+      when :special_authority_ignore_slashes_state then special_authority_ignore_slashes_state(c)
+      when :authority_state                        then authority_state(c)
+      when :host_state                             then host_state(c)
+      when :port_state                             then port_state(c)
+      when :file_state                             then file_state(c)
+      when :file_slash_state                       then file_slash_state(c)
+      when :file_host_state                        then file_host_state(c)
+      when :path_start_state                       then path_start_state(c)
+      when :path_state                             then path_state(c)
+      when :opaque_path_state                      then opaque_path_state(c)
+      when :query_state                            then query_state(c)
+      when :fragment_state                         then fragment_state(c)
+      end
+    end
 
     def reset
       @buffer = +""
