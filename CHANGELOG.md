@@ -1,3 +1,7 @@
+## 0.2.1
+
+* Improve the performance of `parse`
+
 ## 0.2.0
 
 * Fix setter methods compliant with WHATWG URL Living Standard
