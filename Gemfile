@@ -6,10 +6,10 @@ gemspec
 
 gem "debug"
 gem "irb"
-gem "irb-reload"
+gem "irb-reload" if RUBY_VERSION >= "3.2.0"
 gem "benchmark-ips"
 gem "memory_profiler"
-gem "rake", "~> 13.0"
+gem "rake"
 gem "simplecov"
 gem "stackprof"
 gem "test-unit"
