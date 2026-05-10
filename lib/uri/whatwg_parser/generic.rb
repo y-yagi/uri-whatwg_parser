@@ -117,6 +117,19 @@ module URI
         set_path(parse_result[5])
       end
 
+      def fragment=(v)
+        if v.nil? || v.empty?
+          @fragment = nil
+          return
+        end
+
+        v = v.start_with?("#") ? v[1..-1] : v
+        self.fragment = +""
+
+        parse_result = URI::DEFAULT_PARSER.split(v, url: self, state_override: :fragment_state)
+        @fragment = parse_result[8].to_s
+      end
+
       def userinfo=(userinfo)
         return super unless URI::DEFAULT_PARSER.is_a?(URI::WhatwgParser)
 
