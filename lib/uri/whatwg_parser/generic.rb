@@ -32,7 +32,7 @@ module URI
         self.set_path(path)
         self.query = query
         self.set_opaque(opaque)
-        self.fragment=(fragment)
+        @fragment = fragment
 
         self.set_path("") if !@path && !@opaque
         DEFAULT_PARSER.parse(to_s) if arg_check
@@ -115,6 +115,19 @@ module URI
 
         parse_result = URI::DEFAULT_PARSER.split(v.to_s, url: self, state_override: :path_start_state)
         set_path(parse_result[5])
+      end
+
+      def fragment=(v)
+        if v.nil? || v.empty?
+          @fragment = nil
+          return
+        end
+
+        v = v.start_with?("#") ? v[1..-1] : v
+        self.fragment = +""
+
+        parse_result = URI::DEFAULT_PARSER.split(v, url: self, state_override: :fragment_state)
+        @fragment = parse_result[8].to_s
       end
 
       def userinfo=(userinfo)

@@ -2,7 +2,7 @@
 
 Ruby implementation of the [WHATWG URL Living Standard](https://url.spec.whatwg.org/).
 
-The latest revision that this package implements of the standard is [16 February 2026](https://url.spec.whatwg.org/commit-snapshots/5a0ae6ba9782da62e85482f27ac6c210da05f37b/).
+The latest revision that this package implements of the standard is [14 April 2026](https://url.spec.whatwg.org/commit-snapshots/b11d73b8caefe90403afe19210db05acba897722/)
 
 ## Installation
 

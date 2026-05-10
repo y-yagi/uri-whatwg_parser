@@ -87,6 +87,17 @@ class URI::WhatwgParser::TestSetters < Test::Unit::TestCase
     end
   end
 
+  def test_set_fragment
+    SETTERS_TESTS_DATA["hash"].each do |data|
+      uri = @parser.parse(data["href"])
+      uri.fragment = data["new_value"]
+
+      assert_equal data["expected"]["href"], uri.to_s, "href=#{data["expected"]["href"]}, new_value=#{data["new_value"]}" unless uri.opaque
+      fragment = uri.fragment.to_s.empty? ? "" : "##{uri.fragment}"
+      assert_equal data["expected"]["hash"], fragment, "href=#{data["expected"]["href"]}, new_value=#{data["new_value"]}"
+    end
+  end
+
   def test_set_userinfo
     uri = @parser.parse("https://example.com")
     uri.userinfo = "user:pass"
