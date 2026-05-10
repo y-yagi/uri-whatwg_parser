@@ -32,7 +32,7 @@ module URI
         self.set_path(path)
         self.query = query
         self.set_opaque(opaque)
-        self.fragment=(fragment)
+        @fragment = fragment
 
         self.set_path("") if !@path && !@opaque
         DEFAULT_PARSER.parse(to_s) if arg_check

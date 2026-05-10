@@ -564,8 +564,10 @@ module URI
         # TODO: We need to consider encoding here.
         @parse_result[:query] = utf8_percent_encode_string(@buffer, query_percent_encode_set)
         @buffer.clear
-        @parse_result[:fragment] = +""
-        @state = :fragment_state if c == "#"
+        if c == "#"
+          @parse_result[:fragment] = +""
+          @state = :fragment_state
+        end
       elsif !c.nil?
         @buffer << c
       end
