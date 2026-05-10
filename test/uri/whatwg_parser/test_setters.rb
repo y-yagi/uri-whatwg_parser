@@ -87,6 +87,17 @@ class URI::WhatwgParser::TestSetters < Test::Unit::TestCase
     end
   end
 
+  def test_set_query
+    SETTERS_TESTS_DATA["search"].each do |data|
+      uri = @parser.parse(data["href"])
+      uri.query = data["new_value"]
+
+      assert_equal data["expected"]["href"], uri.to_s, "href=#{data["expected"]["href"]}, new_value=#{data["new_value"]}"
+      query = uri.query.to_s.empty? ? "" : "?#{uri.query}"
+      assert_equal data["expected"]["search"], query, "href=#{data["expected"]["href"]}, new_value=#{data["new_value"]}"
+    end
+  end
+
   def test_set_fragment
     SETTERS_TESTS_DATA["hash"].each do |data|
       uri = @parser.parse(data["href"])

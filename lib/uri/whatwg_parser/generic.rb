@@ -117,6 +117,19 @@ module URI
         set_path(parse_result[5])
       end
 
+      def query=(v)
+        if v.nil? || v.empty?
+          @query = nil
+          return
+        end
+
+        v = v.start_with?("?") ? v[1..-1] : v
+        @query = +""
+
+        parse_result = URI::DEFAULT_PARSER.split(v, url: self, state_override: :query_state)
+        @query = parse_result[7].to_s
+      end
+
       def fragment=(v)
         if v.nil? || v.empty?
           @fragment = nil
