@@ -137,7 +137,7 @@ module URI
         end
 
         v = v.start_with?("#") ? v[1..-1] : v
-        self.fragment = +""
+        @fragment = +""
 
         parse_result = URI::DEFAULT_PARSER.split(v, url: self, state_override: :fragment_state)
         @fragment = parse_result[8].to_s
