@@ -42,12 +42,14 @@ module URI
       end
 
       def merge(oth)
+        return super unless parsed_by_whatwg_parser?
+
         URI::DEFAULT_PARSER.join(self.to_s, oth.to_s)
       end
       alias + merge
 
       def scheme=(v)
-        return super unless URI::DEFAULT_PARSER.is_a?(URI::WhatwgParser)
+        return super unless parsed_by_whatwg_parser?
         return if v.nil? || v.empty?
 
         parse_result = URI::DEFAULT_PARSER.split("#{v}:", url: self, state_override: :scheme_start_state)
@@ -56,7 +58,7 @@ module URI
       end
 
       def user=(v)
-        return super unless URI::DEFAULT_PARSER.is_a?(URI::WhatwgParser)
+        return super unless parsed_by_whatwg_parser?
         return v unless v
 
         if host.nil? || host.empty? || scheme == "file"
@@ -66,7 +68,7 @@ module URI
       end
 
       def password=(v)
-        return super unless URI::DEFAULT_PARSER.is_a?(URI::WhatwgParser)
+        return super unless parsed_by_whatwg_parser?
         return v unless v
 
         if host.nil? || host.empty? || scheme == "file"
@@ -76,7 +78,7 @@ module URI
       end
 
       def host=(v)
-        return super unless URI::DEFAULT_PARSER.is_a?(URI::WhatwgParser)
+        return super unless parsed_by_whatwg_parser?
         return if v.nil?
 
         if @opaque
@@ -89,7 +91,7 @@ module URI
       end
 
       def port=(v)
-        return super unless URI::DEFAULT_PARSER.is_a?(URI::WhatwgParser)
+        return super unless parsed_by_whatwg_parser?
         return if v.nil?
 
         if v.to_s.empty?
@@ -106,7 +108,7 @@ module URI
       end
 
       def path=(v)
-        return super unless URI::DEFAULT_PARSER.is_a?(URI::WhatwgParser)
+        return super unless parsed_by_whatwg_parser?
         return if v.nil?
 
         if @opaque
@@ -118,6 +120,8 @@ module URI
       end
 
       def query=(v)
+        return super unless parsed_by_whatwg_parser?
+
         if v.nil? || v.empty?
           @query = nil
           return
@@ -131,6 +135,8 @@ module URI
       end
 
       def fragment=(v)
+        return super unless parsed_by_whatwg_parser?
+
         if v.nil? || v.empty?
           @fragment = nil
           return
@@ -144,7 +150,7 @@ module URI
       end
 
       def userinfo=(userinfo)
-        return super unless URI::DEFAULT_PARSER.is_a?(URI::WhatwgParser)
+        return super unless parsed_by_whatwg_parser?
 
         user, password = split_userinfo(userinfo)
         self.user = user
@@ -152,7 +158,8 @@ module URI
       end
 
       def check_opaque(v)
-        return super unless URI::DEFAULT_PARSER.is_a?(URI::WhatwgParser)
+        return super unless parsed_by_whatwg_parser?
+
         return v unless v
 
         if @host || @port || @user || @path
@@ -162,6 +169,12 @@ module URI
         self.set_opaque(v)
         DEFAULT_PARSER.parse(to_s)
         true
+      end
+
+      private
+
+      def parsed_by_whatwg_parser?
+        self.parser.is_a?(URI::WhatwgParser)
       end
     end
   end
