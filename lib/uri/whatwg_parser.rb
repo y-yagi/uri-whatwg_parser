@@ -96,6 +96,7 @@ module URI
 
       userinfo = [@username, @password].compact.reject(&:empty?).join(":")
       path = "/#{@paths.join("/")}" if @paths && !@paths.empty?
+      path = @parse_result[:opaque] if @parse_result[:opaque]
       [@parse_result[:scheme], userinfo, @parse_result[:host], @parse_result[:port], @parse_result[:registry], path, @parse_result[:opaque], @parse_result[:query], @parse_result[:fragment]]
     end
 

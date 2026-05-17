@@ -75,15 +75,8 @@ class URI::WhatwgParser::TestSetters < Test::Unit::TestCase
   def test_set_path
     SETTERS_TESTS_DATA["pathname"].each do |data|
       uri = @parser.parse(data["href"])
-      # FIXME: In WHATWG URL standard, an opaque should be treated as a path, but it is being treated as opaque for compatibility reasons.
-      if uri.opaque
-        assert_raises(URI::InvalidURIError) do
-          uri.path =  data["new_value"]
-        end
-      else
-        (uri.path = data["new_value"]) rescue nil
-        assert_equal data["expected"]["pathname"], uri.path.to_s
-      end
+      (uri.path = data["new_value"]) rescue nil
+      assert_equal data["expected"]["pathname"], uri.path.to_s
     end
   end
 
@@ -103,7 +96,7 @@ class URI::WhatwgParser::TestSetters < Test::Unit::TestCase
       uri = @parser.parse(data["href"])
       uri.fragment = data["new_value"]
 
-      assert_equal data["expected"]["href"], uri.to_s, "href=#{data["expected"]["href"]}, new_value=#{data["new_value"]}" unless uri.opaque
+      assert_equal data["expected"]["href"], uri.to_s, "href=#{data["expected"]["href"]}, new_value=#{data["new_value"]}"
       fragment = uri.fragment.to_s.empty? ? "" : "##{uri.fragment}"
       assert_equal data["expected"]["hash"], fragment, "href=#{data["expected"]["href"]}, new_value=#{data["new_value"]}"
     end
