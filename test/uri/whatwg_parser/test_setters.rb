@@ -96,7 +96,7 @@ class URI::WhatwgParser::TestSetters < Test::Unit::TestCase
       uri = @parser.parse(data["href"])
       uri.fragment = data["new_value"]
 
-      assert_equal data["expected"]["href"], uri.to_s, "href=#{data["expected"]["href"]}, new_value=#{data["new_value"]}" unless uri.opaque
+      assert_equal data["expected"]["href"], uri.to_s, "href=#{data["expected"]["href"]}, new_value=#{data["new_value"]}"
       fragment = uri.fragment.to_s.empty? ? "" : "##{uri.fragment}"
       assert_equal data["expected"]["hash"], fragment, "href=#{data["expected"]["href"]}, new_value=#{data["new_value"]}"
     end
