@@ -162,8 +162,8 @@ module URI
 
         return v unless v
 
-        if @host || @port || @user || @path
-          raise InvalidURIError, "cannot set opaque with host, port, userinfo or path"
+        if @host || @port || @user
+          raise InvalidURIError, "cannot set opaque with host, port, or userinfo"
         end
 
         self.set_opaque(v)
