@@ -54,8 +54,8 @@ module URI
       @base = nil
       if base != nil
         ary = split(base, base: nil)
-        @base = { scheme: ary[0], userinfo: ary[1], host: ary[2], port: ary[3], registry: ary[4], path: ary[5], opaque: ary[6], query: ary[7], fragment: ary[8]}
-        @base_paths = @paths
+        @base = { scheme: ary[0], userinfo: ary[1], host: ary[2], port: ary[3], registry: ary[4], path: ary[5], query: ary[7], fragment: ary[8]}
+        @base_path = @path
         reset
       end
 
@@ -95,9 +95,14 @@ module URI
       end
 
       userinfo = [@username, @password].compact.reject(&:empty?).join(":")
-      path = "/#{@paths.join("/")}" if @paths && !@paths.empty?
-      path = @parse_result[:opaque] if @parse_result[:opaque]
-      [@parse_result[:scheme], userinfo, @parse_result[:host], @parse_result[:port], @parse_result[:registry], path, @parse_result[:opaque], @parse_result[:query], @parse_result[:fragment]]
+      if @path
+        if @path.is_a?(Array)
+          path = "/#{@path.join("/")}"
+        else
+          opaque = @path
+        end
+      end
+      [@parse_result[:scheme], userinfo, @parse_result[:host], @parse_result[:port], @parse_result[:registry], path, opaque, @parse_result[:query], @parse_result[:fragment]]
     end
 
     def join(*uris)
@@ -144,10 +149,10 @@ module URI
       @at_sign_seen = nil
       @password_token_seen = nil
       @inside_brackets = nil
-      @paths = nil
+      @path = nil
       @username = nil
       @password = nil
-      @parse_result = { scheme: nil, host: nil, port: nil, registry: nil, path: nil, opaque: nil, query: nil, fragment: nil }
+      @parse_result = { scheme: nil, host: nil, port: nil, registry: nil, path: nil, query: nil, fragment: nil }
       @state_override = nil
       @state = :scheme_start_state
       @special_url = nil
@@ -208,7 +213,7 @@ module URI
           @state = :path_or_authority_state
           @pos += 1
         else
-          @parse_result[:opaque] = +""
+          @path = +""
           @state = :opaque_path_state
         end
       elsif @state_override.nil?
@@ -221,12 +226,12 @@ module URI
     end
 
     def no_scheme_state(c)
-      raise ParseError, "scheme is missing" if @base.nil? || (!@base[:opaque].nil? && c != "#")
+      raise ParseError, "scheme is missing" if @base.nil? || (has_opaque_path?(@base_path) && c != "#")
 
-      if !@base[:opaque].nil? && c == "#"
+      if has_opaque_path?(@base_path) && c == "#"
         @parse_result[:scheme] = @base[:scheme]
         @special_url = special_url?(@base[:scheme])
-        @paths = @base_paths
+        @path = @base_path
         @parse_result[:query] = @base[:query]
         @parse_result[:fragment] = nil
         @state = :fragment_state
@@ -269,7 +274,7 @@ module URI
         @username, @password = @base[:userinfo].split(":") if @base[:userinfo]
         @parse_result[:host] = @base[:host]
         @parse_result[:port] = @base[:port]
-        @paths = @base_paths
+        @path = @base_path
         @parse_result[:query] = @base[:query]
 
         if c == "?"
@@ -431,7 +436,7 @@ module URI
           if !starts_with_windows_drive_letter?(rest)
             shorten_url_path
           else
-            @paths = nil
+            @path = nil
           end
           @state = :path_state
           @pos -= 1
@@ -448,10 +453,10 @@ module URI
       else
         if !@base.nil? && @base[:scheme] == "file"
           @parse_result[:host] = @base[:host]
-          if !starts_with_windows_drive_letter?(rest) && @base_paths && normalized_windows_drive_letter?(@base_paths[0])
-            if @paths.nil?
-              @paths ||= []
-              @paths[0] = @base_paths[0]
+          if !starts_with_windows_drive_letter?(rest) && @base_path && normalized_windows_drive_letter?(@base_path[0])
+            if @path.nil?
+              @path ||= []
+              @path[0] = @base_path[0]
             end
           end
         end
@@ -501,29 +506,29 @@ module URI
         @pos -= 1 if c != "/"
         @state = :path_state
       elsif @state_override && @parse_result[:host].nil?
-        @paths ||= []
-        @paths << ""
+        @path ||= []
+        @path << ""
       end
     end
 
     def path_state(c)
-      @paths ||= []
+      @path ||= []
 
       if (c.nil? || c == "/") || (@special_url && c == "\\") || (!@state_override && (c == "?" || c == "#"))
         if double_dot_path_segments?(@buffer)
           shorten_url_path
 
           if c != "/" && !(@special_url && c == "\\")
-            @paths << ""
+            @path << ""
           end
         elsif single_dot_path_segments?(@buffer) && c != "/" && !((@special_url && c == "\\"))
-          @paths << ""
+          @path << ""
         elsif !single_dot_path_segments?(@buffer)
-          if @parse_result[:scheme] == "file" && @paths.empty? && windows_drive_letter?(@buffer)
+          if @parse_result[:scheme] == "file" && @path.empty? && windows_drive_letter?(@buffer)
             @buffer[1] = ":"
           end
 
-          @paths << @buffer
+          @path << @buffer
         end
 
         @buffer = +""
@@ -550,12 +555,12 @@ module URI
       elsif c == " "
         first_of_rest = @input_chars[@pos + 1]
         if first_of_rest == "?" || first_of_rest == "#"
-          @parse_result[:opaque] << "%20"
+          @path += "%20"
         else
-          @parse_result[:opaque] << " "
+          @path += " "
         end
       elsif !c.nil?
-        @parse_result[:opaque] << utf8_percent_encode(c, C0_CONTROL_PERCENT_ENCODE_SET)
+        @path += utf8_percent_encode(c, C0_CONTROL_PERCENT_ENCODE_SET)
       end
     end
 
@@ -604,9 +609,9 @@ module URI
     end
 
     def shorten_url_path
-      return if @paths.nil?
-      return if @parse_result[:scheme] == "file" && @paths.length == 1 && normalized_windows_drive_letter?(@paths.first)
-      @paths.pop
+      return if @path.nil? || @path.is_a?(String)
+      return if @parse_result[:scheme] == "file" && @path.length == 1 && normalized_windows_drive_letter?(@path.first)
+      @path.pop
     end
 
     def includes_credentials?
@@ -641,6 +646,10 @@ module URI
           str.sub!(/[\u0000-\u0020]*\z/, "")
         end
       end
+    end
+
+    def has_opaque_path?(path)
+      path.is_a?(String)
     end
   end
 
