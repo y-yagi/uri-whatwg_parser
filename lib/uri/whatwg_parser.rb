@@ -532,7 +532,7 @@ module URI
           @parse_result[:query] = nil
           @state = :query_state
         elsif c == "#"
-          @parse_result[:frament] = nil
+          @parse_result[:fragment] = nil
           @state = :fragment_state
         end
       else
