@@ -82,7 +82,7 @@ module URI
         return if v.nil?
 
         if @opaque
-          raise InvalidURIError, "cannot set host with registry or opaque"
+          raise InvalidURIError, "cannot set host with opaque"
         end
 
         parse_result = URI::DEFAULT_PARSER.split(v.to_s, url: self, state_override: :host_state)
@@ -197,8 +197,8 @@ module URI
         if (@host || @port) && !@path.empty? && !@path.start_with?('/')
           str << "/"
         end
-        str << @path
-        str << @opaque if @opaque && !@path
+        str << @path if @path
+        str << @opaque if @opaque
         if @query
           str << "?"
           str << @query
