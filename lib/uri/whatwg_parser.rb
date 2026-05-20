@@ -54,7 +54,7 @@ module URI
       @base = nil
       if base != nil
         ary = split(base, base: nil)
-        @base = { scheme: ary[0], userinfo: ary[1], host: ary[2], port: ary[3], registry: ary[4], path: ary[5], query: ary[7], fragment: ary[8]}
+        @base = { scheme: ary[0], userinfo: ary[1], host: ary[2], port: ary[3], path: ary[5], query: ary[7], fragment: ary[8]}
         @base_path = @path
         reset
       end
@@ -102,7 +102,7 @@ module URI
           opaque = @path
         end
       end
-      [@parse_result[:scheme], userinfo, @parse_result[:host], @parse_result[:port], @parse_result[:registry], path, opaque, @parse_result[:query], @parse_result[:fragment]]
+      [@parse_result[:scheme], userinfo, @parse_result[:host], @parse_result[:port], nil, path, opaque, @parse_result[:query], @parse_result[:fragment]]
     end
 
     def join(*uris)
@@ -152,7 +152,7 @@ module URI
       @path = nil
       @username = nil
       @password = nil
-      @parse_result = { scheme: nil, host: nil, port: nil, registry: nil, path: nil, query: nil, fragment: nil }
+      @parse_result = { scheme: nil, host: nil, port: nil, path: nil, query: nil, fragment: nil }
       @state_override = nil
       @state = :scheme_start_state
       @special_url = nil
