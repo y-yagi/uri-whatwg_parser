@@ -152,7 +152,7 @@ module URI
       @path = nil
       @username = nil
       @password = nil
-      @parse_result = { scheme: nil, host: nil, port: nil, query: nil, fragment: nil }
+      @parse_result = {}
       @state_override = nil
       @state = :scheme_start_state
       @special_url = nil
