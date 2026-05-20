@@ -54,7 +54,7 @@ module URI
       @base = nil
       if base != nil
         ary = split(base, base: nil)
-        @base = { scheme: ary[0], userinfo: ary[1], host: ary[2], port: ary[3], path: ary[5], query: ary[7], fragment: ary[8]}
+        @base = { scheme: ary[0], userinfo: ary[1], host: ary[2], port: ary[3], query: ary[7], fragment: ary[8]}
         @base_path = @path
         reset
       end
@@ -152,7 +152,7 @@ module URI
       @path = nil
       @username = nil
       @password = nil
-      @parse_result = { scheme: nil, host: nil, port: nil, path: nil, query: nil, fragment: nil }
+      @parse_result = { scheme: nil, host: nil, port: nil, query: nil, fragment: nil }
       @state_override = nil
       @state = :scheme_start_state
       @special_url = nil
