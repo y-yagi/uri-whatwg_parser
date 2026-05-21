@@ -12,7 +12,6 @@ module URI
                      arg_check = false)
 
         return super unless URI::DEFAULT_PARSER.is_a?(URI::WhatwgParser)
-        return super if registry
 
         @scheme = nil
         @user = nil
