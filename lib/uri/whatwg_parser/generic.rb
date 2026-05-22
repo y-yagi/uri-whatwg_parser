@@ -193,7 +193,7 @@ module URI
           str << ":"
           str << @port.to_s
         end
-        if (@host || @port) && !@path.empty? && !@path.start_with?('/')
+        if (@host || @port) && !@path.nil? && !@path.empty? && !@path.start_with?('/')
           str << "/"
         end
         str << @path if @path
