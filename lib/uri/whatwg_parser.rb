@@ -36,6 +36,8 @@ module URI
     ASCII_ALPHA_UPPERCASE = Set.new(("A".."Z").to_a)
     ASCII_DIGIT = Set.new(("0".."9").to_a)
 
+    attr_reader :path
+
     def initialize
       reset
       @host_parser = HostParser.new

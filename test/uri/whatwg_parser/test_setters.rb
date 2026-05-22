@@ -78,6 +78,7 @@ class URI::WhatwgParser::TestSetters < Test::Unit::TestCase
     SETTERS_TESTS_DATA["pathname"].each do |data|
       uri = @parser.parse(data["href"])
       (uri.path = data["new_value"]) rescue nil
+      assert_equal data["expected"]["href"], uri.to_s, "href=#{data["expected"]["href"]}, new_value=#{data["new_value"]}"
       assert_equal data["expected"]["pathname"], uri.path.to_s + uri.opaque.to_s
     end
   end
