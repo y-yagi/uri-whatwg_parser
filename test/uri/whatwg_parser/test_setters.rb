@@ -26,6 +26,7 @@ class URI::WhatwgParser::TestSetters < Test::Unit::TestCase
       uri = @parser.parse(data["href"])
       (uri.user = data["new_value"]) rescue nil
 
+      # NOTE: `uri` gem reset a password when a username is changed. So we can't check `href` here because a password may be differ.
       assert_equal data["expected"]["username"], uri.user.to_s
     end
   end
@@ -35,6 +36,7 @@ class URI::WhatwgParser::TestSetters < Test::Unit::TestCase
       uri = @parser.parse(data["href"])
       (uri.password = data["new_value"]) rescue nil
 
+      # NOTE: `uri` gem reset a username when a password is changed. So we can't check `href` here because a username may be differ.
       assert_equal data["expected"]["password"], uri.password.to_s
     end
   end
