@@ -19,6 +19,7 @@ module URI
         @host = nil
         @port = nil
         @path = nil
+        @raw_path = nil
         @query = nil
         @opaque = nil
         @fragment = nil
@@ -32,6 +33,7 @@ module URI
         self.query = query
         self.set_opaque(opaque)
         @fragment = fragment
+        @raw_path = parser&.path
 
         self.set_path("") if !@path && !@opaque
         DEFAULT_PARSER.parse(to_s) if arg_check
@@ -115,6 +117,7 @@ module URI
         end
 
         parse_result = URI::DEFAULT_PARSER.split(v.to_s, url: self, state_override: :path_start_state)
+        @raw_path = parser.path
         set_path(parse_result[5])
       end
 
@@ -193,8 +196,8 @@ module URI
           str << ":"
           str << @port.to_s
         end
-        if (@host || @port) && !@path.empty? && !@path.start_with?('/')
-          str << "/"
+        if @host.nil? && @opaque.nil? && @raw_path && @raw_path.length > 1 && @raw_path[0] == ""
+          str << "/."
         end
         str << @path if @path
         str << @opaque if @opaque
