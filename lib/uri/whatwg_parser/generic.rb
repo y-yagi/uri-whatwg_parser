@@ -165,6 +165,7 @@ module URI
         end
 
         self.set_opaque(v)
+        # NOTE: WHATWG URL Living Standard doesn't define "opaque" setter. So parse a URL whole.
         parser.parse(to_s)
         true
       end
