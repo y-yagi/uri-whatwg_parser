@@ -426,6 +426,7 @@ module URI
         @state = :file_slash_state
       elsif !@base.nil? && @base[:scheme] == "file"
         @parse_result[:host] = @base[:host]
+        @path = @base_path
         @parse_result[:query] = @base[:query]
         if c == "?"
           @parse_result[:query] = nil
