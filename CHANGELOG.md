@@ -1,3 +1,8 @@
+## 0.3.0
+
+* Fix several incorrect parsing processes
+* Fix serialize URL
+
 ## 0.2.1
 
 * Improve the performance of `parse`
