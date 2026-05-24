@@ -25,7 +25,7 @@ module URI
 
     WINDOWS_DRIVE_LETTER = Regexp.new("\\A([a-zA-Z][:|])\\z")
     NORMALIZED_WINDOWS_DRIVE_LETTER = Regexp.new("\\A([a-zA-Z][:])\\z")
-    STARTS_WITH_WINDOWS_DRIVE_LETTER = Regexp.new("\\A([a-zA-Z][:|])(?:[/\\?#])?\\z")
+    FILE_OTHERWISE_CODE_POINTS = Set["/", "\\", "?", "#"]
 
     VALID_SIGNS_FOR_SCHEME = Set["+", "-", "."]
     DELIMITER_SIGNS = Set["/", "?", "#"]
@@ -421,11 +421,11 @@ module URI
       @parse_result[:scheme] = "file"
       @special_url = true
       @parse_result[:host] = nil
-
       if c == "/" || c == "\\"
         @state = :file_slash_state
       elsif !@base.nil? && @base[:scheme] == "file"
         @parse_result[:host] = @base[:host]
+        @path = @base_path
         @parse_result[:query] = @base[:query]
         if c == "?"
           @parse_result[:query] = nil
@@ -456,10 +456,8 @@ module URI
         if !@base.nil? && @base[:scheme] == "file"
           @parse_result[:host] = @base[:host]
           if !starts_with_windows_drive_letter?(rest) && @base_path && normalized_windows_drive_letter?(@base_path[0])
-            if @path.nil?
-              @path ||= []
-              @path[0] = @base_path[0]
-            end
+            @path = [] if @path.nil?
+            @path << @base_path[0]
           end
         end
         @state = :path_state
@@ -591,7 +589,9 @@ module URI
     end
 
     def starts_with_windows_drive_letter?(str)
-      STARTS_WITH_WINDOWS_DRIVE_LETTER.match?(str)
+      return false if str.length < 2
+      return false unless windows_drive_letter?(str[0, 2])
+      str.length == 2 || FILE_OTHERWISE_CODE_POINTS.include?(str[2])
     end
 
     def normalized_windows_drive_letter?(str)
@@ -621,7 +621,7 @@ module URI
     end
 
     def rest
-      @input_chars[@pos + 1..]&.join
+      @input_chars[@pos..]&.join
     end
 
     def convert_to_uri(uri)
