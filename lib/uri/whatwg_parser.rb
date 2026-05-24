@@ -48,7 +48,7 @@ module URI
     end
 
     def parse(input, base: nil, url: nil, state_override: nil) # :nodoc:
-      URI.for(*self.split(input, base: base, url: url, state_override: state_override))
+      URI.for(*self.split(input, base: base, url: url, state_override: state_override), self)
     end
 
     def split(input, base: nil, url: nil, state_override: nil) # :nodoc:
