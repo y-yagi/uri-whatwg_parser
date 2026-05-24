@@ -23,7 +23,7 @@ class URI::WhatwgParser::TestURLTest < Test::Unit::TestCase
         assert_equal testdata["protocol"], parse_result[:scheme].to_s + ":", "[protocol]"
         assert_equal testdata["hostname"], parse_result[:host].to_s, "[hostname]"
         assert_equal testdata["port"], parse_result[:port].to_s, "[port]"
-        assert_equal testdata["pathname"], parse_result[:path], "[pathname]" unless testdata["pathname"] == "/"
+        assert_equal testdata["pathname"], parse_result[:path].to_s + parse_result[:opaque].to_s, "[pathname]" unless testdata["pathname"] == "/"
         assert_equal testdata["hash"], "##{parse_result[:fragment]}", "[hash]" unless testdata["hash"].empty?
         assert_equal testdata["search"], "?#{parse_result[:query]}", "[search]" unless testdata["search"].empty?
         if !testdata["username"].empty? || !testdata["password"].empty?
