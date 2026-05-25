@@ -96,7 +96,11 @@ module URI
         @pos += 1
       end
 
-      userinfo = [@username, @password].compact.reject(&:empty?).join(":")
+      if @password
+        userinfo = "#{@username}:#{@password}"
+      else
+        userinfo = @username
+      end
       if @path
         if @path.is_a?(Array)
           path = "/#{@path.join("/")}"
