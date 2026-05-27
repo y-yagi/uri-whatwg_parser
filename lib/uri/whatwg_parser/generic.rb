@@ -26,7 +26,7 @@ module URI
         self.set_port(port)
         self.set_userinfo(userinfo)
         self.set_path(path)
-        self.query = query
+        @query = query
         self.set_opaque(opaque)
         @fragment = fragment
         @raw_path = parser&.path

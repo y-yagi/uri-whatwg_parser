@@ -29,6 +29,19 @@ class URI::WhatwgParser::TestURLTest < Test::Unit::TestCase
         user, password = parse_result[:userinfo].to_s.split(":", 2)
         assert_equal testdata["username"], user, "[username]" unless testdata["username"].empty?
         assert_equal testdata["password"], password, "[password]" unless testdata["password"].empty?
+
+        # FIXME: `mailto:` is skipped because it contains processing that is incompatible with `uri` gem.
+        return if testdata["protocol"] == "mailto:"
+        # NOTE: URI::Generic#to_s doesn't set a port when it is the default port for the scheme, but WHATWG URL parser does set it.
+        #       So skip the test when the scheme is "ldap:" and the port is the default port for LDAP.
+        return if testdata["protocol"] == "ldap:" && testdata["port"].to_i == URI::LDAP::DEFAULT_PORT
+
+        if testdata["base"]
+          uri = URI.join(testdata["base"], testdata["input"])
+        else
+          uri = URI.parse(testdata["input"])
+        end
+        assert_equal testdata["href"], uri.to_s
       end
     end
   end

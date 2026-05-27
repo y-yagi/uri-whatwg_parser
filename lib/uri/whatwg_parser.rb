@@ -239,7 +239,7 @@ module URI
         @special_url = special_url?(@base[:scheme])
         @path = @base_path
         @parse_result[:query] = @base[:query]
-        @parse_result[:fragment] = nil
+        @parse_result[:fragment] = +""
         @state = :fragment_state
       elsif @base[:scheme] != "file"
         @state = :relative_state
@@ -284,10 +284,10 @@ module URI
         @parse_result[:query] = @base[:query]
 
         if c == "?"
-          @parse_result[:query] = nil
+          @parse_result[:query] = +""
           @state = :query_state
         elsif c == "#"
-          @parse_result[:fragment] = nil
+          @parse_result[:fragment] = +""
           @state = :fragment_state
         elsif !c.nil?
           @parse_result[:query] = nil
@@ -432,10 +432,10 @@ module URI
         @path = @base_path
         @parse_result[:query] = @base[:query]
         if c == "?"
-          @parse_result[:query] = nil
+          @parse_result[:query] = +""
           @state = :query_state
         elsif c == "#"
-          @parse_result[:fragment] = nil
+          @parse_result[:fragment] = +""
           @state = :fragment_state
         elsif !c.nil?
           @parse_result[:query] = nil
@@ -503,8 +503,10 @@ module URI
         @pos -= 1 if c != "/" && c != "\\"
         @state = :path_state
       elsif !@state_override && c == "?"
+        @parse_result[:query] = +""
         @state = :query_state
       elsif !@state_override && c == "#"
+        @parse_result[:fragment] = +""
         @state = :fragment_state
       elsif c != nil
         @pos -= 1 if c != "/"
@@ -538,10 +540,10 @@ module URI
         @buffer = +""
 
         if c == "?"
-          @parse_result[:query] = nil
+          @parse_result[:query] = +""
           @state = :query_state
         elsif c == "#"
-          @parse_result[:fragment] = nil
+          @parse_result[:fragment] = +""
           @state = :fragment_state
         end
       else
@@ -551,10 +553,10 @@ module URI
 
     def opaque_path_state(c)
       if c == "?"
-        @parse_result[:query] = nil
+        @parse_result[:query] = +""
         @state = :query_state
       elsif c == "#"
-        @parse_result[:fragment] = nil
+        @parse_result[:fragment] = +""
         @state = :fragment_state
       elsif c == " "
         first_of_rest = @input_chars[@pos + 1]
