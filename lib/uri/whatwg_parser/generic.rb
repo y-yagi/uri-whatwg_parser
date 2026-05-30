@@ -6,7 +6,7 @@ module URI
       def initialize(scheme, userinfo, host, port, registry, path, opaque, query, fragment, parser = DEFAULT_PARSER, arg_check = false)
         @parsed_by_whatwg_parser = parser.is_a?(URI::WhatwgParser)
         unless parser.is_a?(URI::WhatwgParser)
-          return super(scheme, userinfo, host, port, registry, path, opaque, query, fragment)
+          return super(scheme, userinfo, host, port, registry, path, opaque, query, fragment, URI::RFC3986_PARSER, arg_check)
         end
 
         @scheme = nil

@@ -126,5 +126,8 @@ class URI::TestGenericTest < Test::Unit::TestCase
       userinfo: "user:pass"
     )
     assert_equal "http://user:pass@www.example.com:8080/foo/bar?x=1&y=2#frag", uri.to_s
+
+    uri.scheme = "https"
+    assert_equal "https", uri.scheme
   end
 end
