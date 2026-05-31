@@ -398,7 +398,7 @@ module URI
         @buffer << c
       elsif c.nil? || DELIMITER_SIGNS.include?(c) || (@special_url && c == "\\") || @state_override
         unless @buffer.empty?
-          port = Integer(@buffer, 10)
+          port = @buffer.to_i
           raise ParseError, "port is invalid value" if port < 0 || port > 65535
           if SPECIAL_SCHEME[@parse_result[:scheme]] == port
             @parse_result[:port] = nil
@@ -413,7 +413,6 @@ module URI
           end
         end
 
-        raise ParseError, "port is invalid value" if @state_override
         @state = :path_start_state
         @pos -= 1
       else
