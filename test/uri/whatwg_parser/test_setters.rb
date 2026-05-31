@@ -44,7 +44,6 @@ class URI::WhatwgParser::TestSetters < Test::Unit::TestCase
   def test_set_host
     skip_tests_by_comment = Set.new([
       "Port numbers are 16 bit integers, overflowing is an error. Hostname is still set, though.",
-      "Port number is unchanged if not specified",
     ])
 
     SETTERS_TESTS_DATA["host"].each do |data|
