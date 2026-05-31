@@ -1,5 +1,4 @@
 # URI::WhatwgParser
-
 Ruby implementation of the [WHATWG URL Living Standard](https://url.spec.whatwg.org/).
 
 The latest revision that this package implements of the standard is [14 April 2026](https://url.spec.whatwg.org/commit-snapshots/b11d73b8caefe90403afe19210db05acba897722/)
@@ -26,10 +25,6 @@ URI.parse("http://日本語.jp")
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
 
 To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
-
-## TODO
-
-* Support validations
 
 ## Contributing
 
