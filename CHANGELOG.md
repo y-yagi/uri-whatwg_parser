@@ -1,3 +1,9 @@
+## 0.3.1
+
+* Fix a bug of parsing Windows drive letter
+* Correctly set a password when a username is nil
+* Fix setter methods behavior with `URI object created by `build` method
+
 ## 0.3.0
 
 * Fix several incorrect parsing processes
