@@ -259,7 +259,13 @@ class URI::WhatwgParser
         return domain
       end
 
-      ascii_domain = URI::IDNA.whatwg_to_ascii(domain.force_encoding(Encoding::UTF_8), be_strict: false)
+      begin
+        ascii_domain = URI::IDNA.whatwg_to_ascii(domain.force_encoding(Encoding::UTF_8), be_strict: false)
+      rescue URI::IDNA::Error, Encoding::CompatibilityError, ArgumentError
+        raise ParseError, "invalid host value" unless domain.ascii_only?
+
+        ascii_domain = domain.downcase
+      end
 
       raise ParseError, "including invalid value in host" if include_forbidden_domain_code_point?(ascii_domain)
       raise ParseError, "host can't be empty" if ascii_domain.empty?
