@@ -1,3 +1,7 @@
+## 0.3.2
+
+* Fix domain-to-ASCII process on host parsing to follow the latest spec
+
 ## 0.3.1
 
 * Fix a bug of parsing Windows drive letter
