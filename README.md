@@ -1,7 +1,7 @@
 # URI::WhatwgParser
 Ruby implementation of the [WHATWG URL Living Standard](https://url.spec.whatwg.org/).
 
-The latest revision that this package implements of the standard is [26 June 2026](https://url.spec.whatwg.org/commit-snapshots/3c83874ae1eac84ceb71d8c4344673251c982bbe/)
+The latest revision that this package implements of the standard is [6 July 2026](https://url.spec.whatwg.org/commit-snapshots/9dc3827fc722ac4af3f11061aa3e9adb44a17c8b/)
 
 ## Installation
 
