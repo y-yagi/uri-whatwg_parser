@@ -28,4 +28,14 @@ class URI::WhatwgParser::TestParserTest < Test::Unit::TestCase
       assert_raise(URI::WhatwgParser::ParseError) { parser.parse(url) }
     end
   end
+
+  def test_parse_ipv6_host_with_trailing_colon
+    parser = URI::WhatwgParser.new
+    ["https://[1:2:3:4:5:6:7:8:]/", "https://[::11:1:]/", "https://[1::2:]/", "https://[1:]/"].each do |url|
+      assert_raise(URI::WhatwgParser::ParseError) { parser.parse(url) }
+    end
+
+    assert_equal "[1::]", parser.parse("https://[1::]/").host
+    assert_equal "[1:2:3:4:5:6::]", parser.parse("https://[1:2:3:4:5:6::]/").host
+  end
 end
