@@ -18,11 +18,14 @@ class URI::WhatwgParser::TestParserTest < Test::Unit::TestCase
     assert_equal "Say%20what%E2%80%BD", parser.utf8_percent_encode_string("Say what‽", URI::WhatwgParser::USERINFO_PERCENT_ENCODE_SET)
   end
 
-  def test_parse_ipv6_host_with_full_pieces
+  def test_parse_ipv6_host_with_compression
     parser = URI::WhatwgParser.new
-    assert_equal "[1:2:3:4:5:6:102:304]", parser.parse("https://[1:2:3:4:5:6::1.2.3.4]/").host
-    assert_equal "[1:2:3:4:5:6:7:8]", parser.parse("https://[::1:2:3:4:5:6:7:8]/").host
-    assert_equal "[1:2:3:4:5:6:7:8]", parser.parse("https://[1:2:3:4:5:6:7::8]/").host
     assert_equal "[1:0:2:3:4:5:6:7]", parser.parse("https://[1::2:3:4:5:6:7]/").host
+    assert_equal "[1:2:3:4:5:6:0:7]", parser.parse("https://[1:2:3:4:5:6::7]/").host
+    assert_equal "[1:2:3:4:5:0:102:304]", parser.parse("https://[1:2:3:4:5::1.2.3.4]/").host
+
+    ["https://[::1:2:3:4:5:6:7:8]/", "https://[1:2:3:4:5:6:7::8]/", "https://[1:2:3:4:5:6::1.2.3.4]/"].each do |url|
+      assert_raise(URI::WhatwgParser::ParseError) { parser.parse(url) }
+    end
   end
 end
