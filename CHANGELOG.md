@@ -1,3 +1,7 @@
+## Unreleased
+
+* Fix parsing an IPv4 address embedded in an IPv6 address with leading zeroes and non-decimal numbers
+
 ## 0.3.2
 
 * Fix domain-to-ASCII process on host parsing to follow the latest spec

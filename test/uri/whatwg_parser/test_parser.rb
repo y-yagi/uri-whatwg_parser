@@ -17,4 +17,12 @@ class URI::WhatwgParser::TestParserTest < Test::Unit::TestCase
     parser = URI::WhatwgParser.new
     assert_equal "Say%20what%E2%80%BD", parser.utf8_percent_encode_string("Say what‽", URI::WhatwgParser::USERINFO_PERCENT_ENCODE_SET)
   end
+
+  def test_parse_ipv6_host_with_full_pieces
+    parser = URI::WhatwgParser.new
+    assert_equal "[1:2:3:4:5:6:102:304]", parser.parse("https://[1:2:3:4:5:6::1.2.3.4]/").host
+    assert_equal "[1:2:3:4:5:6:7:8]", parser.parse("https://[::1:2:3:4:5:6:7:8]/").host
+    assert_equal "[1:2:3:4:5:6:7:8]", parser.parse("https://[1:2:3:4:5:6:7::8]/").host
+    assert_equal "[1:0:2:3:4:5:6:7]", parser.parse("https://[1::2:3:4:5:6:7]/").host
+  end
 end

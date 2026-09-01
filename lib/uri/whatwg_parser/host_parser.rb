@@ -99,18 +99,9 @@ class URI::WhatwgParser
         end
 
         if chars[i] == "."
-          # IPv4-mapped address must be valid and complete, no trailing dot
-          ipv4_piece = chars[i - length, chars.length - (i - length)].join
-          parts = ipv4_piece.split(".")
-          if parts.length != 4 || parts.any? { |p| p.empty? } || ipv4_piece.end_with?(".")
-            raise ParseError, "invalid IPv6 format"
-          end
+          raise ParseError, "invalid IPv6 format" if length == 0 || piece_index > 6
 
-          ipv4 = parse_ipv4(ipv4_piece)
-          address[piece_index] = (ipv4 >> 16) & 0xFFFF
-          address[piece_index + 1] = ipv4 & 0xFFFF
-          piece_index += 2
-          i = chars.length
+          piece_index = parse_embedded_ipv4(chars, i - length, address, piece_index)
           break
         end
 
@@ -119,26 +110,66 @@ class URI::WhatwgParser
         address[piece_index] = value
         piece_index += 1
 
-        if i < chars.length
-          if chars[i] == ":"
-            i += 1
-          elsif chars[i] != nil
-            raise ParseError, "invalid IPv6 format"
-          end
+        if chars[i] == ":"
+          i += 1
+        elsif chars[i]
+          raise ParseError, "invalid IPv6 format"
         end
       end
 
       if compress
-        swaps = piece_index - compress
-        (0...swaps).each do |j|
-          address[7 - j] = address[compress + swaps - 1 - j]
-          address[compress + swaps - 1 - j] = 0
-        end
+        expand_ipv6_compression(address, compress, piece_index)
       elsif piece_index != 8
         raise ParseError, "invalid IPv6 format"
       end
 
       compress_ipv6(address)
+    end
+
+    def parse_embedded_ipv4(chars, i, address, piece_index)
+      numbers_seen = 0
+
+      while i < chars.length
+        if numbers_seen > 0
+          raise ParseError, "invalid IPv6 format" unless chars[i] == "." && numbers_seen < 4
+          i += 1
+        end
+
+        raise ParseError, "invalid IPv6 format" unless chars[i]&.match?(/[0-9]/)
+
+        ipv4_piece = nil
+        while chars[i]&.match?(/[0-9]/)
+          number = chars[i].to_i
+          if ipv4_piece.nil?
+            ipv4_piece = number
+          elsif ipv4_piece == 0
+            raise ParseError, "invalid IPv6 format"
+          else
+            ipv4_piece = ipv4_piece * 10 + number
+          end
+          raise ParseError, "invalid IPv6 format" if ipv4_piece > 255
+          i += 1
+        end
+
+        address[piece_index] = address[piece_index] * 256 + ipv4_piece
+        numbers_seen += 1
+        piece_index += 1 if numbers_seen == 2 || numbers_seen == 4
+      end
+
+      raise ParseError, "invalid IPv6 format" if numbers_seen != 4
+
+      piece_index
+    end
+
+    def expand_ipv6_compression(address, compress, piece_index)
+      swaps = piece_index - compress
+      piece_index = 7
+
+      while piece_index != 0 && swaps > 0
+        address[piece_index], address[compress + swaps - 1] = address[compress + swaps - 1], address[piece_index]
+        piece_index -= 1
+        swaps -= 1
+      end
     end
 
     def compress_ipv6(address)
