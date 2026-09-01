@@ -1,6 +1,7 @@
 ## Unreleased
 
 * Fix parsing an IPv4 address embedded in an IPv6 address with leading zeroes and non-decimal numbers
+* Fix parsing an IPv6 address to reject a trailing `:`
 
 ## 0.3.2
 

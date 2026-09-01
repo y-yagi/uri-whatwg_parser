@@ -114,6 +114,7 @@ class URI::WhatwgParser
 
         if chars[i] == ":"
           i += 1
+          raise ParseError, "invalid IPv6 format" unless chars[i]
         elsif chars[i]
           raise ParseError, "invalid IPv6 format"
         end
