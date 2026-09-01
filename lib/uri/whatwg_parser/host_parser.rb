@@ -77,6 +77,7 @@ class URI::WhatwgParser
       if chars[i] == ":"
         raise ParseError, "invalid IPv6 format" unless chars[i + 1] == ":"
         i += 2
+        piece_index += 1
         compress = piece_index
       end
 
@@ -86,6 +87,7 @@ class URI::WhatwgParser
         if chars[i] == ":"
           raise ParseError, "invalid IPv6 format" if compress
           i += 1
+          piece_index += 1
           compress = piece_index
           next
         end
