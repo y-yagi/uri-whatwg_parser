@@ -633,7 +633,7 @@ module URI
     end
 
     def initialize # :nodoc:
-      @worker = Worker.new
+      freeze
     end
 
     def regexp # :nodoc:
@@ -645,7 +645,7 @@ module URI
     end
 
     def split(input, base: nil, url: nil, state_override: nil) # :nodoc:
-      @worker.split(input, base: base, url: url, state_override: state_override)
+      worker.split(input, base: base, url: url, state_override: state_override)
     end
 
     def join(*uris) # :nodoc:
@@ -661,7 +661,7 @@ module URI
     end
 
     def path # :nodoc:
-      @worker.path
+      worker.path
     end
 
     private
@@ -676,9 +676,15 @@ module URI
           "bad argument (expected URI object or URI string)"
       end
     end
+
+    def worker
+      Thread.current.thread_variable_get(:uri_whatwg_parser_worker) ||
+        Thread.current.thread_variable_set(:uri_whatwg_parser_worker, Worker.new)
+    end
   end
 
   WHATWG_PARSER = URI::WhatwgParser.new
+  Ractor.make_shareable(WHATWG_PARSER) if defined?(Ractor)
 end
 
 URI.send(:remove_const, :DEFAULT_PARSER) if defined?(URI::DEFAULT_PARSER)
