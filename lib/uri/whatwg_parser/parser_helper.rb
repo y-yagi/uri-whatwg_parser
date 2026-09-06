@@ -5,7 +5,7 @@ require "set"
 class URI::WhatwgParser
   module ParserHelper
     # NOTE: This set isn't accurate, but it's OK now because greater than `0x7e` is checked inside a method.
-    C0_CONTROL_PERCENT_ENCODE_SET = Set.new((0..0x1f).map(&:chr))
+    C0_CONTROL_PERCENT_ENCODE_SET = Set.new((0..0x1f).map(&:chr)).freeze
 
     def utf8_percent_encode(c, encode_set)
       return c unless encode_set.include?(c) || c.ord > 0x7e

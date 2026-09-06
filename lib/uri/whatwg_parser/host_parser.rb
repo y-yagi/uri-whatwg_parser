@@ -8,7 +8,7 @@ class URI::WhatwgParser
     include ParserHelper
 
     FORBIDDEN_HOST_CODE_POINT = Set["\x00", "\t", "\x0a", "\x0d", " ", "#", "/", ":", "<", ">", "?", "@", "[", "\\", "]", "^", "|"].freeze
-    FORBIDDEN_DOMAIN_CODE_POINT = FORBIDDEN_HOST_CODE_POINT | C0_CONTROL_PERCENT_ENCODE_SET | Set["%", "\x7f"].freeze
+    FORBIDDEN_DOMAIN_CODE_POINT = (FORBIDDEN_HOST_CODE_POINT | C0_CONTROL_PERCENT_ENCODE_SET | Set["%", "\x7f"]).freeze
     FORBIDDEN_HOST_REGEX = Regexp.union(FORBIDDEN_HOST_CODE_POINT.to_a).freeze
     FORBIDDEN_DOMAIN_REGEX = Regexp.union(FORBIDDEN_DOMAIN_CODE_POINT.to_a).freeze
 
