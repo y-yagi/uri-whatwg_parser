@@ -130,4 +130,11 @@ class URI::TestGenericTest < Test::Unit::TestCase
     uri.scheme = "https"
     assert_equal "https", uri.scheme
   end
+
+  def test_ractor
+    assert_ractor(<<~RUBY, require: "uri/whatwg_parser")
+      r = Ractor.new { URI.parse("https://ruby-lang.org/foo?a=1#b").to_s }
+      assert_equal("https://ruby-lang.org/foo?a=1#b", r.value)
+    RUBY
+  end
 end
