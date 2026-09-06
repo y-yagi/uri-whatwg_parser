@@ -7,3 +7,6 @@ SimpleCov.start
 require "uri/whatwg_parser"
 require "debug"
 require "test/unit"
+require "core_assertions"
+
+Test::Unit::TestCase.include Test::Unit::CoreAssertions
