@@ -118,7 +118,7 @@ class URI::WhatwgParser::TestSetters < Test::Unit::TestCase
     assert_equal "newuser@example.com", uri.opaque
 
     uri = @parser.parse("http://example.com/path")
-    assert_raises(URI::InvalidURIError) do
+    assert_raise(URI::InvalidURIError) do
       uri.opaque = "newpath"
     end
   end

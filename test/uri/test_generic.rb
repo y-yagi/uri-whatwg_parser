@@ -22,7 +22,7 @@ class URI::TestGenericTest < Test::Unit::TestCase
     assert_equal "nonsense", uri.scheme
     assert_equal "/test", uri.path
 
-    assert_raises(URI::WhatwgParser::ParseError) do
+    assert_raise(URI::WhatwgParser::ParseError) do
       URI.parse(nil)
     end
 
@@ -103,7 +103,7 @@ class URI::TestGenericTest < Test::Unit::TestCase
     uri.path = "/index.html"
     assert_equal "/index.html", uri.path
 
-    assert_raises(URI::InvalidURIError) do
+    assert_raise(URI::InvalidURIError) do
       uri.opaque = "a"
     end
   end
@@ -129,5 +129,12 @@ class URI::TestGenericTest < Test::Unit::TestCase
 
     uri.scheme = "https"
     assert_equal "https", uri.scheme
+  end
+
+  def test_ractor
+    assert_ractor(<<~RUBY, require: "uri/whatwg_parser")
+      r = Ractor.new { URI.parse("https://ruby-lang.org/foo?a=1#b").to_s }
+      assert_equal("https://ruby-lang.org/foo?a=1#b", r.value)
+    RUBY
   end
 end
