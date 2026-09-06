@@ -12,29 +12,29 @@ module URI
   class WhatwgParser
     include ParserHelper
 
-    SPECIAL_SCHEME = { "ftp" => 21, "file" => nil, "http" => 80, "https" => 443, "ws" => 80, "wss" => 443 }
+    SPECIAL_SCHEME = { "ftp" => 21, "file" => nil, "http" => 80, "https" => 443, "ws" => 80, "wss" => 443 }.freeze
 
-    FRAGMENT_PERCENT_ENCODE_SET = C0_CONTROL_PERCENT_ENCODE_SET | Set[" ", "\"", "<", ">", "`"]
-    QUERY_PERCENT_ENCODE_SET = C0_CONTROL_PERCENT_ENCODE_SET | Set[" ", "\"", "#", "<", ">"]
-    SPECIAL_QUERY_PERCENT_ENCODE_SET = QUERY_PERCENT_ENCODE_SET | Set["'"]
-    PATH_PERCENT_ENCODE_SET = QUERY_PERCENT_ENCODE_SET | Set["?", "^", "`", "{", "}"]
-    USERINFO_PERCENT_ENCODE_SET = PATH_PERCENT_ENCODE_SET | Set["/", ":", ";", "=", "@", "[", "\\", "]", "|"]
+    FRAGMENT_PERCENT_ENCODE_SET = (C0_CONTROL_PERCENT_ENCODE_SET | Set[" ", "\"", "<", ">", "`"]).freeze
+    QUERY_PERCENT_ENCODE_SET = (C0_CONTROL_PERCENT_ENCODE_SET | Set[" ", "\"", "#", "<", ">"]).freeze
+    SPECIAL_QUERY_PERCENT_ENCODE_SET = (QUERY_PERCENT_ENCODE_SET | Set["'"]).freeze
+    PATH_PERCENT_ENCODE_SET = (QUERY_PERCENT_ENCODE_SET | Set["?", "^", "`", "{", "}"]).freeze
+    USERINFO_PERCENT_ENCODE_SET = (PATH_PERCENT_ENCODE_SET | Set["/", ":", ";", "=", "@", "[", "\\", "]", "|"]).freeze
 
-    SINGLE_DOT_PATH_SEGMENTS = Set[".", "%2e", "%2E"]
-    DOUBLE_DOT_PATH_SEGMENTS = Set["..", ".%2e", ".%2E", "%2e.", "%2e%2e", "%2e%2E", "%2E.", "%2E%2e", "%2E%2E"]
+    SINGLE_DOT_PATH_SEGMENTS = Set[".", "%2e", "%2E"].freeze
+    DOUBLE_DOT_PATH_SEGMENTS = Set["..", ".%2e", ".%2E", "%2e.", "%2e%2e", "%2e%2E", "%2E.", "%2E%2e", "%2E%2E"].freeze
 
-    WINDOWS_DRIVE_LETTER = Regexp.new("\\A([a-zA-Z][:|])\\z")
-    NORMALIZED_WINDOWS_DRIVE_LETTER = Regexp.new("\\A([a-zA-Z][:])\\z")
-    FILE_OTHERWISE_CODE_POINTS = Set["/", "\\", "?", "#"]
+    WINDOWS_DRIVE_LETTER = Regexp.new("\\A([a-zA-Z][:|])\\z").freeze
+    NORMALIZED_WINDOWS_DRIVE_LETTER = Regexp.new("\\A([a-zA-Z][:])\\z").freeze
+    FILE_OTHERWISE_CODE_POINTS = Set["/", "\\", "?", "#"].freeze
 
-    VALID_SIGNS_FOR_SCHEME = Set["+", "-", "."]
-    DELIMITER_SIGNS = Set["/", "?", "#"]
+    VALID_SIGNS_FOR_SCHEME = Set["+", "-", "."].freeze
+    DELIMITER_SIGNS = Set["/", "?", "#"].freeze
 
-    WS_SCHEMES = Set["ws", "wss"]
+    WS_SCHEMES = Set["ws", "wss"].freeze
 
-    ASCII_ALPHA_LOWERCASE = Set.new(("a".."z").to_a)
-    ASCII_ALPHA_UPPERCASE = Set.new(("A".."Z").to_a)
-    ASCII_DIGIT = Set.new(("0".."9").to_a)
+    ASCII_ALPHA_LOWERCASE = Set.new(("a".."z").to_a).freeze
+    ASCII_ALPHA_UPPERCASE = Set.new(("A".."Z").to_a).freeze
+    ASCII_DIGIT = Set.new(("0".."9").to_a).freeze
 
     attr_reader :path
 
