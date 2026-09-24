@@ -47,6 +47,12 @@ class URI::TestGenericTest < Test::Unit::TestCase
 
     uri = URI.parse("file://monkey/\\")
     assert_equal "file://monkey//", uri.to_s
+
+    uri = URI.parse("web+demo:/.//not-a-host/")
+    assert_equal "web+demo:/.//not-a-host/", uri.to_s
+
+    uri = URI::Generic.new(nil, nil, nil, nil, nil, "/x", nil, nil, nil)
+    assert_equal "/x", uri.to_s
   end
 
   def test_join
