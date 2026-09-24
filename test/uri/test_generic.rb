@@ -53,6 +53,14 @@ class URI::TestGenericTest < Test::Unit::TestCase
 
     uri = URI::Generic.new(nil, nil, nil, nil, nil, "/x", nil, nil, nil)
     assert_equal "/x", uri.to_s
+
+    uri = URI.parse("postgres:db")
+    assert_equal "db", uri.opaque
+    assert_equal "postgres:db", uri.to_s
+
+    uri = URI.parse("postgres:///foo")
+    assert_nil uri.opaque
+    assert_equal "postgres:///foo", uri.to_s
   end
 
   def test_join
