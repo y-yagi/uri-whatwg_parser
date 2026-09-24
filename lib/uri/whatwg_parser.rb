@@ -649,7 +649,7 @@ module URI
     end
 
     def join(*uris) # :nodoc:
-      return parse(uris[0]) if uris.size == 1
+      return parse(uris[0].to_s) if uris.size == 1
 
       base, input = uris.shift(2)
       uri = parse(input.to_s, base: base.to_s)
