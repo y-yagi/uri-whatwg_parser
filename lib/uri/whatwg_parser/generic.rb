@@ -58,7 +58,7 @@ module URI
         return v unless v
 
         if host.nil? || host.empty? || scheme == "file"
-          raise InvalidURIError, "cannot set user when host is nil or file schme"
+          raise InvalidURIError, "cannot set user when host is nil or file scheme"
         end
         set_user(parser.utf8_percent_encode_string(v, URI::WhatwgParser::USERINFO_PERCENT_ENCODE_SET))
       end
@@ -68,7 +68,7 @@ module URI
         return v unless v
 
         if host.nil? || host.empty? || scheme == "file"
-          raise InvalidURIError, "cannot set password when host is nil or file schme"
+          raise InvalidURIError, "cannot set password when host is nil or file scheme"
         end
         set_password(parser.utf8_percent_encode_string(v, URI::WhatwgParser::USERINFO_PERCENT_ENCODE_SET))
       end
