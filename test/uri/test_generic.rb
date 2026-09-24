@@ -29,6 +29,13 @@ class URI::TestGenericTest < Test::Unit::TestCase
     uri = URI::DEFAULT_PARSER.parse(nil, base: "http://example.com/a?b#c")
     assert_equal "http://example.com/a?b", uri.to_s
 
+    assert_raise(URI::WhatwgParser::ParseError) do
+      URI.parse("http://a/\xFF".dup.force_encoding(Encoding::UTF_8))
+    end
+
+    uri = URI.parse("http://a/\xFF".b)
+    assert_equal "http://a/%FF", uri.to_s
+
     uri = URI.parse("file://localhost/")
     assert_equal "file:///", uri.to_s
 

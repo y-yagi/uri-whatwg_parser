@@ -76,6 +76,8 @@ module URI
 
         input = input.dup
 
+        raise ParseError, "input contains an invalid byte sequence" unless input.valid_encoding?
+
         unless url
           remove_c0_control_or_space!(input)
         end
