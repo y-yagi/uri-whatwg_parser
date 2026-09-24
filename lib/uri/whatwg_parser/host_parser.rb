@@ -277,6 +277,13 @@ class URI::WhatwgParser
 
       return 0 if str.empty?
 
+      digits = case r
+               when 16 then /\A[0-9A-Fa-f]+\z/
+               when 8 then /\A[0-7]+\z/
+               else /\A[0-9]+\z/
+               end
+      raise ParseError, "invalid IPv4 format" unless str.match?(digits)
+
       begin
         Integer(str, r)
       rescue ArgumentError

@@ -38,4 +38,11 @@ class URI::WhatwgParser::TestParserTest < Test::Unit::TestCase
     assert_equal "[1::]", parser.parse("https://[1::]/").host
     assert_equal "[1:2:3:4:5:6::]", parser.parse("https://[1:2:3:4:5:6::]/").host
   end
+
+  def test_parse_ipv4_number_rejects_non_digit_characters
+    parser = URI::WhatwgParser.new
+    ["http://+1.2.3.4/", "http://1_0.0.0.1/", "http://-1.2.3.4/", "http://0x0x1.2/"].each do |url|
+      assert_raise(URI::WhatwgParser::ParseError) { parser.parse(url) }
+    end
+  end
 end
