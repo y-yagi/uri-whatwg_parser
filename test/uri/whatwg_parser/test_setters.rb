@@ -19,6 +19,10 @@ class URI::WhatwgParser::TestSetters < Test::Unit::TestCase
       assert_equal data["expected"]["href"], uri.to_s, "href=#{data["expected"]["href"]}, new_value=#{data["new_value"]}"
       assert_equal data["expected"]["protocol"], "#{uri.scheme}:"
     end
+
+    uri = @parser.parse("http://x/")
+    uri.scheme = "file"
+    assert_equal "file://x/", uri.to_s
   end
 
   def test_set_user

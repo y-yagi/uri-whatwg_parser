@@ -175,7 +175,7 @@ module URI
           if @state_override
             if (special_url? && !special_url?(@buffer)) ||
               (!special_url? && special_url?(@buffer)) ||
-              ((includes_credentials? || !@parse_result[:port].nil?) && @buffer == "file") ||
+              ((includes_credentials? || (!@parse_result[:port].nil? && @parse_result[:port] != SPECIAL_SCHEME[@parse_result[:scheme]])) && @buffer == "file") ||
               (@parse_result[:scheme] == "file" && @parse_result[:host]&.empty?)
               @terminate = true
               return
