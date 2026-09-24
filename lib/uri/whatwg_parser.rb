@@ -71,6 +71,7 @@ module URI
           raise ArgumentError, "state override is invalid" if !state_override.to_s.end_with?("_state") || !respond_to?(@state_override, private: true)
         else
           raise ParseError, "uri can't be empty" if (input.nil? || input.empty?) && @base.nil?
+          input = "" if input.nil?
         end
 
         input = input.dup
