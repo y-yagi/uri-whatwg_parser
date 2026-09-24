@@ -29,7 +29,6 @@ module URI
         @query = query
         self.set_opaque(opaque)
         @fragment = fragment
-        @raw_path = parser&.path
 
         self.set_path("") if !@path && !@opaque
         parser.parse(to_s) if arg_check
@@ -113,7 +112,7 @@ module URI
         end
 
         parse_result = parser.split(v.to_s, url: self, state_override: :path_start_state)
-        @raw_path = parser.path
+        set_raw_path(parser.path)
         set_path(parse_result[5])
       end
 
@@ -208,6 +207,10 @@ module URI
           str << @fragment
         end
         str
+      end
+
+      def set_raw_path(v) # :nodoc:
+        @raw_path = v
       end
     end
   end

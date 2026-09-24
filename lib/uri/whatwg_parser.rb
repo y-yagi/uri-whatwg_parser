@@ -644,7 +644,11 @@ module URI
     end
 
     def parse(input, base: nil, url: nil, state_override: nil) # :nodoc:
-      URI.for(*self.split(input, base: base, url: url, state_override: state_override), self)
+      parts = self.split(input, base: base, url: url, state_override: state_override)
+      raw_path = worker.path
+      uri = URI.for(*parts, self)
+      uri.set_raw_path(raw_path)
+      uri
     end
 
     def split(input, base: nil, url: nil, state_override: nil) # :nodoc:
