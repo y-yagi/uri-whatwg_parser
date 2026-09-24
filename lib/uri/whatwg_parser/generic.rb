@@ -178,7 +178,7 @@ module URI
           str << ":"
         end
 
-        if @host || %w[file postgres].include?(@scheme)
+        if !@opaque && (@host || %w[file postgres].include?(@scheme))
           str << "//"
         end
         if self.userinfo
