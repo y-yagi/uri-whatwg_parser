@@ -26,6 +26,9 @@ class URI::TestGenericTest < Test::Unit::TestCase
       URI.parse(nil)
     end
 
+    uri = URI::DEFAULT_PARSER.parse(nil, base: "http://example.com/a?b#c")
+    assert_equal "http://example.com/a?b", uri.to_s
+
     uri = URI.parse("file://localhost/")
     assert_equal "file:///", uri.to_s
 
