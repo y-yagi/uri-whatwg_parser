@@ -186,7 +186,7 @@ module URI
           @special_url = special_url?(@buffer)
 
           if @state_override
-            if SPECIAL_SCHEME.value?(@parse_result[:port].to_i)
+            if SPECIAL_SCHEME[@buffer] == @parse_result[:port]
               @parse_result[:port] = nil
             end
             @terminate = true
