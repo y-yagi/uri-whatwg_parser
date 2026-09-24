@@ -23,6 +23,10 @@ class URI::WhatwgParser::TestSetters < Test::Unit::TestCase
     uri = @parser.parse("http://x/")
     uri.scheme = "file"
     assert_equal "file://x/", uri.to_s
+
+    uri = @parser.parse("http://x:21/")
+    uri.scheme = "https"
+    assert_equal "https://x:21/", uri.to_s
   end
 
   def test_set_user
